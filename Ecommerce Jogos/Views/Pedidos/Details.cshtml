@@ -1,0 +1,217 @@
+﻿@model Pedido
+@{
+    ViewData["Title"] = $"Detalhes do Pedido #{Model.ID}";
+    var pagamentos = ViewBag.Pagamentos as List<PagamentoPedido>;
+    var cuponsUtilizados = ViewBag.CuponsUtilizados as List<Cupom>;
+    var cupomDeTrocaGerado = ViewBag.CupomDeTroca as Cupom;
+
+    var subtotal = Model.ItensPedido.Sum(i => i.PrecoUnitario * i.Quantidade);
+    decimal frete = 0;
+    if (Model.Endereco != null)
+    {
+        var uf = Model.Endereco.Cidade.Estado.UF;
+        if (uf == "SP")
+        {
+            frete = 10.50m;
+        }
+        else if (new[] { "RJ", "MG", "ES" }.Contains(uf))
+        {
+            frete = 18.00m;
+        }
+        else
+        {
+            frete = 25.75m;
+        }
+    }
+
+    // O desconto é derivado do que "sobra"
+    var descontoTotal = subtotal + frete - Model.ValorTotal;
+}
+
+<div class="container mt-4">
+
+    @if (Model.Status == "TROCADO" && cupomDeTrocaGerado != null)
+    {
+        <div class="alert alert-info shadow-sm mb-4" role="alert">
+            <h4 class="alert-heading"><i class="bi bi-ticket-percent-fill"></i> Cupom de Troca Gerado!</h4>
+            <p>Esta troca gerou o seguinte cupom de desconto para o cliente, que pode ser usado em futuras compras.</p>
+            <hr>
+            <p class="mb-0"><strong>Código:</strong> <code class="fs-5">@cupomDeTrocaGerado.Codigo</code></p>
+            <p><strong>Valor:</strong> <strong class="fs-5">@cupomDeTrocaGerado.Valor.ToString("C")</strong></p>
+        </div>
+    }
+
+    <div class="card shadow-sm">
+        <div class="card-header">
+            <h3>Detalhes do Pedido #@Model.ID</h3>
+            <p class="text-muted mb-0">Realizado em: @Model.DataPedido.ToString("dd/MM/yyyy HH:mm") - Status: <strong>@Model.Status</strong></p>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <h5>Enviando para:</h5>
+                    @if (Model.Endereco != null)
+                    {
+                        <address>
+                            <strong>@Model.Cliente.NomeCompleto</strong><br>
+                            @Model.Endereco.Tipo_Logradouro.Tipo @Model.Endereco.Logradouro, @Model.Endereco.Numero<br>
+                            @Model.Endereco.Bairro, @Model.Endereco.Cidade.Nome - @Model.Endereco.Cidade.Estado.UF, CEP: @Model.Endereco.CEP
+                        </address>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Endereço de entrega não encontrado para este pedido.</p>
+                    }
+                </div>
+                <div class="col-md-6 mb-3">
+                    <h5>Pagamento:</h5>
+
+                    @if (pagamentos != null && pagamentos.Any())
+                    {
+                        @foreach (var pagamento in pagamentos)
+                        {
+                            <p class="mb-2">
+                                Cartão de Crédito<br>
+                                <strong>@pagamento.Cartao.Bandeira - Final **** @pagamento.Cartao.UltimosQuatroDigitos</strong><br>
+                                Valor Pago: @pagamento.ValorPago.ToString("C")
+                            </p>
+                        }
+                    }
+
+                    @if (cuponsUtilizados != null && cuponsUtilizados.Any())
+                    {
+                        @foreach (var cupom in cuponsUtilizados)
+                        {
+                            <p class="text-success mb-1">
+                                Cupom Aplicado (@cupom.Codigo)<br>
+                                Desconto: -@cupom.Valor.ToString("C")
+                            </p>
+                        }
+                    }
+
+                    @if ((pagamentos == null || !pagamentos.Any()) && (cuponsUtilizados == null || !cuponsUtilizados.Any()))
+                    {
+                        <p class="text-muted">Forma de pagamento não encontrada.</p>
+                    }
+                </div>
+            </div>
+
+            <hr>
+
+            <h5 class="mb-3">Itens Comprados:</h5>
+            <ul class="list-group list-group-flush">
+                @foreach (var item in Model.ItensPedido)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <img src="@(string.IsNullOrEmpty(item.Produto.URLImagem) ? "https://placehold.co/60x80/2a2a2a/ffffff?text=Capa" : item.Produto.URLImagem)" class="me-3 rounded" alt="Capa do Jogo" style="width: 60px;">
+                            <div>
+                                <strong>@item.Produto.Nome</strong> (@item.Produto.Plataforma.Nome)
+                                <br>
+                                <small class="text-muted">Quantidade: @item.Quantidade</small>
+                            </div>
+                        </div>
+                        <span>@((item.Quantidade * item.PrecoUnitario).ToString("C"))</span>
+                    </li>
+                }
+            </ul>
+        </div>
+        <div class="card-footer">
+            <div class="row text-end">
+                <div class="col-9">Subtotal:</div>
+                <div class="col-3">@subtotal.ToString("C")</div>
+
+                <div class="col-9">Frete:</div>
+                <div class="col-3">@frete.ToString("C")</div>
+                @if (descontoTotal > 0)
+                {
+                    <div class="col-9 text-success">Desconto Total:</div>
+                    <div class="col-3 text-success">-@descontoTotal.ToString("C")</div>
+                }
+                <div class="col-9 h4">Total Pago:</div>
+                <div class="col-3 h4">@Model.ValorTotal.ToString("C")</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <a asp-controller="Clientes" asp-action="Details" asp-route-id="@Model.ClienteID" class="btn btn-primary">Ver Meus Pedidos</a>
+        <a asp-controller="Produtos" asp-action="Catalogo" class="btn btn-outline-secondary">Continuar Comprando</a>
+        @if (Model.Status == "ENTREGUE")
+        {
+            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#trocaModal" data-pedido-id="@Model.ID">
+                <i class="bi bi-arrow-repeat"></i> Solicitar Troca
+            </button>
+        }
+    </div>
+
+</div>
+
+<div class="modal fade" id="trocaModal" tabindex="-1" aria-labelledby="trocaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="trocaModalLabel">Solicitar Troca do Pedido #@Model.ID</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="trocaModalBody">
+                <div class="text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            var modalBody = $('#trocaModalBody');
+            $('#trocaModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var pedidoId = button.data('pedido-id');
+                modalBody.html('<div class="text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+                $.get('/Trocas/Solicitar?pedidoId=' + pedidoId, function (data) {
+                    modalBody.html(data);
+                });
+            });
+
+            $(document).on('submit', '#form-solicitar-troca', function(e) {
+                e.preventDefault();
+                var form = $(this);
+                $('.text-danger').text('');
+                $.ajax({
+                    url: form.attr('action'),
+                    type: form.attr('method'),
+                    data: form.serialize(),
+                    success: function(response) {
+                        if (response.success) {
+                            window.location.href = response.redirectUrl;
+                        }
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 400) {
+                            var errors = xhr.responseJSON;
+                            for (var key in errors) {
+                                var errorSpan;
+                                if (key === 'ItensSelecionados') {
+                                    errorSpan = $('#itens-selecionados-error');
+                                } else {
+                                    errorSpan = $(`[data-valmsg-for="${key}"]`);
+                                }
+                                if (errorSpan) {
+                                    errorSpan.text(errors[key][0]);
+                                }
+                            }
+                        } else {
+                            console.error("Erro ao solicitar a troca: ", xhr.responseText);
+                            alert("Ocorreu um erro ao processar sua solicitação.");
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}

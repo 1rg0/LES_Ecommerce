@@ -1,0 +1,67 @@
+﻿@model EntradaEstoqueViewModel
+@{
+    ViewData["Title"] = "Registrar Entrada de Estoque";
+}
+
+<h1>@ViewData["Title"]</h1>
+<p>Use o formulário abaixo para registrar a chegada de um novo lote de produtos.</p>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="ProdutoID" class="form-label">Produto</label>
+                <select asp-for="ProdutoID" class="form-select" asp-items="ViewBag.Produtos">
+                    <option value="">Selecione o produto que está entrando...</option>
+                </select>
+                <span asp-validation-for="ProdutoID" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="FornecedorID" class="form-label">Fornecedor</label>
+                <select asp-for="FornecedorID" class="form-select" asp-items="ViewBag.Fornecedores">
+                    <option value="">Selecione o fornecedor...</option>
+                </select>
+                <span asp-validation-for="FornecedorID" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+            <div class="col-md-6 mb-3">
+                    <label asp-for="Quantidade" class="form-label">Quantidade Recebida</label>
+                    <input asp-for="Quantidade" class="form-control" />
+                    <span asp-validation-for="Quantidade" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="ValorCusto" class="form-label">Valor de Custo (por unidade)</label>
+                    <div class="input-group">
+                        <span class="input-group-text">R$</span>
+                        <input asp-for="ValorCusto" class="form-control" />
+                    </div>
+                    <span asp-validation-for="ValorCusto" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="DataEntrada" class="form-label"></label>
+                <input asp-for="DataEntrada" class="form-control" />
+                <span asp-validation-for="DataEntrada" class="text-danger"></span>
+            </div>
+
+            <hr />
+            <div class="form-group mt-3">
+                <input type="submit" value="Salvar Entrada" class="btn btn-primary" />
+                <a asp-controller="Estoque" asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

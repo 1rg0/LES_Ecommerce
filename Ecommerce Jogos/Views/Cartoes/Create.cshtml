@@ -1,0 +1,77 @@
+﻿@model Ecommerce_Jogos.Models.CartaoCadastroViewModel
+
+@{
+    ViewData["Title"] = "Cadastro de Cartão";
+    var returnUrl = ViewData["ReturnUrl"] as string;
+}
+
+<h1>@ViewData["Title"]</h1>
+<h4>Adicionando cartão para: <strong>@Model.ClienteNome</strong></h4>
+<hr />
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <input type="hidden" asp-for="ClienteID" />
+
+    <fieldset>
+        <legend>Dados do Cartão de Crédito</legend>
+
+        <div class="form-group mb-2">
+            <label asp-for="NumeroCartao"></label><br>
+            <input asp-for="NumeroCartao" class="form-control" size="12" />
+            <span asp-validation-for="NumeroCartao" class="text-danger"></span>
+        </div>
+        <div class="form-group mb-2">
+            <label asp-for="NomeImpresso"></label><br>
+            <input asp-for="NomeImpresso" class="form-control" size="30" />
+            <span asp-validation-for="NomeImpresso" class="text-danger"></span>
+        </div>
+        <div class="form-group mb-2">
+            <label asp-for="DataValidade"></label><br>
+            <input asp-for="DataValidade" class="form-control" placeholder="MM/AAAA" />
+            <span asp-validation-for="DataValidade" class="text-danger"></span>
+        </div>
+        <div class="form-group mb-2">
+            <label asp-for="Bandeira"></label><br>
+            <select asp-for="Bandeira" class="form-control">
+                <option value="" disabled selected>Selecione...</option>
+                <option value="Visa">Visa</option>
+                <option value="Mastercard">Mastercard</option>
+                <option value="Elo">Elo</option>
+                <option value="American Express">American Express</option>
+                <option value="Outra">Outra</option>
+            </select>
+            <span asp-validation-for="Bandeira" class="text-danger"></span>
+        </div>
+        <div class="form-group mb-2">
+            <label asp-for="CodigoSeguranca"></label><br>
+            <input asp-for="CodigoSeguranca" class="form-control" size="4" />
+            <span asp-validation-for="CodigoSeguranca" class="text-danger"></span>
+        </div>
+        <div class="form-check mb-2">
+            <input class="form-check-input" asp-for="Preferencial" />
+            <label class="form-check-label" asp-for="Preferencial"></label>
+        </div>
+    </fieldset>
+
+    <br>
+    <div class="form-group">
+        <input type="submit" value="Salvar Cartão" class="btn btn-success" />
+        <a href="@(string.IsNullOrEmpty(returnUrl) ? Url.Action("Index", "Cartoes", new { clienteId = Model.ClienteID }) : returnUrl)" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function(){
+            $('#DataValidade').mask('00/0000');
+            $('#NumeroCartao').mask('0000 0000 0000 0000');
+            $('#CodigoSeguranca').mask('000');
+        });
+    </script>
+}

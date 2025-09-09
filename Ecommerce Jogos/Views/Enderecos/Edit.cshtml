@@ -1,0 +1,111 @@
+﻿@model Ecommerce_Jogos.Models.EnderecoEdicaoViewModel
+
+@{
+    ViewData["Title"] = "Editar Endereço";
+}
+
+<h1>Editar Endereço</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="Edit">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <input type="hidden" asp-for="ID" />
+            <input type="hidden" asp-for="ClienteID" />
+
+            <fieldset>
+                <legend>Dados do Endereço</legend>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Apelido" class="form-label"></label>
+                        <input asp-for="Apelido" class="form-control" />
+                        <span asp-validation-for="Apelido" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CEP" class="form-label"></label>
+                        <input asp-for="CEP" class="form-control" />
+                        <span asp-validation-for="CEP" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-2 mb-3">
+                        <label asp-for="Tipo_LogradouroID" class="form-label"></label>
+                        <select asp-for="Tipo_LogradouroID" class="form-control" asp-items="ViewBag.TiposLogradouro"></select>
+                        <span asp-validation-for="Tipo_LogradouroID" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-8 mb-3">
+                        <label asp-for="Logradouro" class="form-label"></label>
+                        <input asp-for="Logradouro" class="form-control" />
+                        <span asp-validation-for="Logradouro" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <label asp-for="Numero" class="form-label"></label>
+                        <input asp-for="Numero" class="form-control" />
+                        <span asp-validation-for="Numero" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Bairro" class="form-label"></label>
+                        <input asp-for="Bairro" class="form-control" />
+                        <span asp-validation-for="Bairro" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="CidadeID" class="form-label"></label>
+                        <select asp-for="CidadeID" class="form-control" asp-items="ViewBag.Cidades"></select>
+                        <span asp-validation-for="CidadeID" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Tipo_EnderecoID" class="form-label"></label>
+                        <select asp-for="Tipo_EnderecoID" class="form-control" asp-items="ViewBag.TiposEndereco"></select>
+                        <span asp-validation-for="Tipo_EnderecoID" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Tipo_ResidenciaID" class="form-label"></label>
+                        <select asp-for="Tipo_ResidenciaID" class="form-control" asp-items="ViewBag.TiposResidencia"></select>
+                        <span asp-validation-for="Tipo_ResidenciaID" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Observacao" class="form-label"></label>
+                    <textarea asp-for="Observacao" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Observacao" class="text-danger"></span>
+                </div>
+            </fieldset>
+
+            <br>
+            <div class="form-group">
+                <input type="submit" value="Salvar Alterações" class="btn btn-primary" />
+                <a asp-action="Index" asp-route-clienteId="@Model.ClienteID" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+            $('#CEP').on('input', function () {
+                var cep = $(this).val().replace(/\D/g, '');
+                if (cep.length > 5) {
+                    cep = cep.replace(/^(\d{5})(\d)/, '$1-$2');
+                }
+                $(this).val(cep);
+            });
+        });
+    </script>
+}

@@ -1,0 +1,286 @@
+﻿@model Ecommerce_Jogos.Helpers.ListaPaginada<Ecommerce_Jogos.Models.Pedido>
+@{
+    ViewData["Title"] = "Gerenciamento de Pedidos";
+}
+
+<h1>@ViewData["Title"]</h1>
+<p>Visualize e gerencie todos os pedidos realizados no sistema.</p>
+<hr />
+
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="bi bi-search"></i> Filtros de Pesquisa
+    </div>
+    <div class="card-body">
+        <form asp-action="Index" method="get">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="filtroCliente" class="form-label">Filtrar por Cliente</label>
+                    <input type="text" id="filtroCliente" name="filtroCliente" class="form-control" placeholder="Nome ou CPF do cliente..." value="@ViewData["FiltroCliente"]">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="filtroStatus" class="form-label">Filtrar por Status</label>
+                    <select id="filtroStatus" name="filtroStatus" class="form-select" asp-items="@(new SelectList(new[] { "EM PROCESSAMENTO", "APROVADA", "EM TRANSPORTE", "ENTREGUE", "EM TROCA", "REPROVADA" }, ViewData["FiltroStatus"]))">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="col-md-5 mb-3">
+                    <label class="form-label">Filtrar por Data do Pedido</label>
+                    <div class="input-group">
+                        <input type="date" class="form-control" name="dataInicio" value="@ViewData["DataInicio"]">
+                        <span class="input-group-text">até</span>
+                        <input type="date" class="form-control" name="dataFim" value="@ViewData["DataFim"]">
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-md-12 text-end">
+                    <a asp-action="Index" class="btn btn-outline-secondary">Limpar Filtros</a>
+                    <button type="submit" class="btn btn-primary">Aplicar Filtros</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success mt-3">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger mt-3">@TempData["ErrorMessage"]</div>
+}
+
+<table class="table table-hover align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>Pedido Nº</th>
+            <th>Data</th>
+            <th>Cliente</th>
+            <th>Valor Total</th>
+            <th class="text-center">Status</th>
+            <th class="text-center">Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var pedido in Model)
+        {
+            <tr>
+                <td>#@pedido.ID</td>
+                <td>@pedido.DataPedido.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>@pedido.Cliente.NomeCompleto</td>
+                <td>@pedido.ValorTotal.ToString("C")</td>
+                <td class="text-center">
+                    @{
+                        var statusClass = pedido.Status switch
+                        {
+                            "APROVADA" => "bg-success",
+                            "EM TRÂNSITO" => "bg-primary",
+                            "ENTREGUE" => "bg-secondary",
+                            "EM TROCA" => "bg-warning text-dark",
+                            "REPROVADA" => "bg-danger",
+                            _ => "bg-info"
+                        };
+                    }
+                    <span class="badge @statusClass">@pedido.Status</span>
+                </td>
+                <td class="text-center">
+                    <a asp-controller="Pedidos" asp-action="Details" asp-route-id="@pedido.ID" class="btn btn-sm btn-info">Detalhes</a>
+
+                    @if (pedido.Status == "EM PROCESSAMENTO")
+                    {
+                        <button type="button" class="btn btn-sm btn-primary btn-despachar"
+                                data-bs-toggle="modal"
+                                data-bs-target="#despacharModal"
+                                data-pedido-id="@pedido.ID">
+                            Despachar Pedido
+                        </button>
+                    }
+
+                    @if (pedido.Status == "EM TRÂNSITO")
+                    {
+                        <button type="button" class="btn btn-sm btn-success btn-entregar"
+                                data-bs-toggle="modal"
+                                data-bs-target="#entregueModal"
+                                data-pedido-id="@pedido.ID">
+                            Confirmar Entrega
+                        </button>
+                    }
+
+                    @if (pedido.Status == "EM TROCA")
+                    {
+                        <button type="button" class="btn btn-sm btn-warning btn-autorizar-troca"
+                                data-bs-toggle="modal"
+                                data-bs-target="#autorizarTrocaModal"
+                                data-pedido-id="@pedido.ID">
+                            Autorizar Troca
+                        </button>
+                    }
+
+                    @if (pedido.Status == "TROCA AUTORIZADA")
+                    {
+                        <button type="button" class="btn btn-sm btn-info btn-receber-troca"
+                                data-bs-toggle="modal"
+                                data-bs-target="#receberTrocaModal"
+                                data-pedido-id="@pedido.ID">
+                            Confirmar Recebimento
+                        </button>
+                    }
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+
+<nav aria-label="Paginação de pedidos">
+    <ul class="pagination justify-content-center">
+        <li class="page-item @prevDisabled">
+            <a asp-action="Index"
+               asp-route-pageNumber="@(Model.PageIndex - 1)"
+               asp-route-filtroCliente="@ViewData["FiltroCliente"]"
+               asp-route-filtroStatus="@ViewData["FiltroStatus"]"
+               asp-route-dataInicio="@ViewData["DataInicio"]"
+               asp-route-dataFim="@ViewData["DataFim"]"
+               class="page-link">Anterior</a>
+        </li>
+        <li class="page-item @nextDisabled">
+            <a asp-action="Index"
+               asp-route-pageNumber="@(Model.PageIndex + 1)"
+               asp-route-filtroCliente="@ViewData["FiltroCliente"]"
+               asp-route-filtroStatus="@ViewData["FiltroStatus"]"
+               asp-route-dataInicio="@ViewData["DataInicio"]"
+               asp-route-dataFim="@ViewData["DataFim"]"
+               class="page-link">Próxima</a>
+        </li>
+    </ul>
+</nav>
+
+<div class="modal fade" id="despacharModal" tabindex="-1" aria-labelledby="despacharModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="despacharModalLabel">Confirmar Despacho</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja alterar o status deste pedido para "EM TRÂNSITO"?</p>
+                <p>Esta ação não pode ser desfeita.</p>
+            </div>
+            <div class="modal-footer">
+                <form asp-controller="Pedidos" asp-action="Despachar" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="despacharPedidoId" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Sim, Despachar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="entregueModal" tabindex="-1" aria-labelledby="entregueModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="entregueModalLabel">Confirmar Entrega</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja alterar o status deste pedido para "ENTREGUE"?</p>
+                <p>Esta ação não pode ser desfeita.</p>
+            </div>
+            <div class="modal-footer">
+                <form asp-controller="Pedidos" asp-action="ConfirmarEntrega" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="entreguePedidoId" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Sim, Confirmar Entrega</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="autorizarTrocaModal" tabindex="-1" aria-labelledby="autorizarTrocaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="autorizarTrocaModalLabel">Autorizar Troca</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja autorizar a troca para este pedido?</p>
+                <p>O status será alterado para "TROCA AUTORIZADA" e o cliente será notificado para enviar o produto.</p>
+            </div>
+            <div class="modal-footer">
+                <form asp-controller="Pedidos" asp-action="AutorizarTroca" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="autorizarTrocaPedidoId" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning">Sim, Autorizar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="receberTrocaModal" tabindex="-1" aria-labelledby="receberTrocaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="receberTrocaModalLabel">Confirmar Recebimento de Troca</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-controller="Pedidos" asp-action="ConfirmarRecebimentoTroca" method="post">
+                <div class="modal-body">
+                    <p>Você está confirmando o recebimento dos itens devolvidos para este pedido.</p>
+                    <p>Após a confirmação, o status do pedido será alterado para "TROCADO" e um cupom de troca será gerado para o cliente.</p>
+                    <hr>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="retornarAoEstoque" value="true" id="retornarAoEstoqueCheck">
+                        <label class="form-check-label" for="retornarAoEstoqueCheck">
+                            <strong>Os itens devem retornar ao estoque?</strong>
+                        </label>
+                        <small class="d-block text-muted">Marque esta opção se os produtos devolvidos estiverem em condições de serem vendidos novamente.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="receberTrocaPedidoId" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-info">Confirmar Recebimento e Gerar Cupom</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $(document).on('click', '.btn-despachar', function() {
+                var pedidoId = $(this).data('pedido-id');
+                $('#despacharPedidoId').val(pedidoId);
+            });
+            $(document).on('click', '.btn-entregar', function() {
+                var pedidoId = $(this).data('pedido-id');
+                $('#entreguePedidoId').val(pedidoId);
+            });
+            $(document).on('click', '.btn-autorizar-troca', function() {
+                var pedidoId = $(this).data('pedido-id');
+                $('#autorizarTrocaPedidoId').val(pedidoId);
+            });
+            $(document).on('click', '.btn-receber-troca', function() {
+                var pedidoId = $(this).data('pedido-id');
+                $('#receberTrocaPedidoId').val(pedidoId);
+            });
+        });
+    </script>
+}

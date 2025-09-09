@@ -1,0 +1,257 @@
+﻿@model Ecommerce_Jogos.Helpers.ListaPaginada<Ecommerce_Jogos.Models.Produto>
+@{
+    ViewData["Title"] = "Gerenciamento de Produtos";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>@ViewData["Title"]</h1>
+    <a asp-controller="Produtos" asp-action="Create" class="btn btn-success">
+        <i class="bi bi-plus-circle"></i> Cadastrar Novo Produto
+    </a>
+</div>
+
+<p>Abaixo está a lista de todos os produtos cadastrados no sistema.</p>
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="bi bi-search"></i> Filtros de Pesquisa
+    </div>
+    <div class="card-body">
+        <form asp-action="Index" method="get">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="filtroTitulo" class="form-label">Filtrar por Título</label>
+                    <input type="text" id="filtroTitulo" name="filtroTitulo" class="form-control" placeholder="Digite o título do jogo..." value="@Context.Request.Query["filtroTitulo"]">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="filtroEdicao" class="form-label">Filtrar por Edição</label>
+                    <input type="text" id="filtroEdicao" name="filtroEdicao" class="form-control" placeholder="Ex: Edição Padrão..." value="@Context.Request.Query["filtroEdicao"]">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label for="filtroPlataforma" class="form-label">Plataforma</label>
+                    <select id="filtroPlataforma" name="filtroPlataforma" class="form-select" asp-items="ViewBag.Plataformas">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="filtroDesenvolvedora" class="form-label">Desenvolvedora</label>
+                    <select id="filtroDesenvolvedora" name="filtroDesenvolvedora" class="form-select" asp-items="ViewBag.Desenvolvedoras">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="filtroPublicadora" class="form-label">Publicadora</label>
+                    <select id="filtroPublicadora" name="filtroPublicadora" class="form-select" asp-items="ViewBag.Publicadoras">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="filtroGrupoPrecificacao" class="form-label">Grupo de Precificação</label>
+                    <select id="filtroGrupoPrecificacao" name="filtroGrupoPrecificacao" class="form-select" asp-items="ViewBag.GruposPrecificacao">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row align-items-end">
+                <div class="col-md-3 mb-3">
+                    <label for="filtroAnoInicio" class="form-label">Ano de Lançamento (de)</label>
+                    <input type="number" id="filtroAnoInicio" name="filtroAnoInicio" class="form-control" placeholder="Ex: 2020" value="@Context.Request.Query["filtroAnoInicio"]">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="filtroAnoFim" class="form-label">Ano de Lançamento (até)</label>
+                    <input type="number" id="filtroAnoFim" name="filtroAnoFim" class="form-control" placeholder="Ex: 2025" value="@Context.Request.Query["filtroAnoFim"]">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label for="filtroStatus" class="form-label">Status</label>
+                    <select id="filtroStatus" name="filtroStatus" class="form-select"
+                            asp-items="@(new SelectList(new[] { new { Value = "true", Text = "Ativo" }, new { Value = "false", Text = "Inativo" } }, "Value", "Text", ViewData["FiltroStatus"]))">
+                        <option value="">Todos</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3 text-end">
+                    <a asp-action="Index" class="btn btn-outline-secondary">Limpar</a>
+                    <button type="submit" class="btn btn-primary">Aplicar Filtros</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<hr />
+
+<table class="table table-striped table-hover align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Capa</th>
+            <th>Título do Jogo</th>
+            <th>Plataforma</th>
+            <th>Edição</th>
+            <th class="text-center">Status</th>
+            <th class="text-center">Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var produto in Model)
+        {
+            <tr>
+                <td>@produto.ID</td>
+                <td>
+                    <img src="@(string.IsNullOrEmpty(produto.URLImagem) ? "https://placehold.co/60x80/2a2a2a/ffffff?text=Capa" : produto.URLImagem)" alt="Capa do Jogo" style="width: 60px; height: 80px; object-fit: cover;" />
+                </td>
+                <td>@produto.Nome</td>
+                <td>@produto.Plataforma.Nome</td>
+                <td>@produto.Edicao</td>
+                <td class="text-center">
+                    @if (produto.Ativo)
+                    {
+                        <span class="badge bg-success">Ativo</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Inativo</span>
+                    }
+                </td>
+                <td class="text-center">
+                    <a asp-controller="Produtos" asp-action="Edit" asp-route-id="@produto.ID" class="btn btn-sm btn-primary">Editar</a>
+
+                    @if (produto.Ativo)
+                    {
+                        <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#statusChangeModal" data-product-id="@produto.ID" data-product-name="@produto.Nome" data-action-type="inativar">Inativar</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#statusChangeModal" data-product-id="@produto.ID" data-product-name="@produto.Nome" data-action-type="ativar">Ativar</button>
+                    }
+
+                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal" data-product-id="@produto.ID" data-product-name="@produto.Nome">Excluir</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Confirmar Exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir permanentemente o produto <strong id="productNameToDelete"></strong>?</p>
+            </div>
+            <div class="modal-footer">
+
+                <form asp-controller="Produtos" asp-action="Delete" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="deleteProductId" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Excluir</button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="statusChangeModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="statusModalLabel">Mudar Status do Produto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="statusModalText"></p>
+
+                <form asp-controller="Produtos" asp-action="ToggleStatus" method="post" id="statusChangeForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="statusProductId" />
+                    <div class="form-group">
+                        <label for="justificativa" class="form-label">Justificativa (Obrigatório)</label>
+                        <textarea id="justificativa" name="motivo" class="form-control" rows="3" required></textarea>
+                    </div>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="confirmStatusChangeBtn" class="btn btn-primary">Confirmar Alteração</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            var confirmDeleteModal = document.getElementById('confirmDeleteModal');
+            if (confirmDeleteModal) {
+                confirmDeleteModal.addEventListener('show.bs.modal', function (event) {
+                    var button = event.relatedTarget;
+                    var productId = button.getAttribute('data-product-id');
+                    var productName = button.getAttribute('data-product-name');
+
+                    var modalProductNameElement = confirmDeleteModal.querySelector('#productNameToDelete');
+                    var modalHiddenInputElement = confirmDeleteModal.querySelector('#deleteProductId');
+
+                    modalProductNameElement.textContent = `"${productName}"`;
+                    modalHiddenInputElement.value = productId;
+                });
+            }
+
+            var statusChangeModal = document.getElementById('statusChangeModal');
+            if (statusChangeModal) {
+                var statusForm = document.getElementById('statusChangeForm');
+                var confirmButton = document.getElementById('confirmStatusChangeBtn');
+
+                statusChangeModal.addEventListener('show.bs.modal', function (event) {
+                    var button = event.relatedTarget;
+                    var productId = button.getAttribute('data-product-id');
+                    var productName = button.getAttribute('data-product-name');
+                    var actionType = button.getAttribute('data-action-type');
+
+                    var modalTextElement = statusChangeModal.querySelector('#statusModalText');
+                    var modalHiddenInputElement = statusChangeModal.querySelector('#statusProductId');
+
+                    if (actionType === 'inativar') {
+                        modalTextElement.innerHTML = `Tem certeza que deseja <strong>INATIVAR</strong> o produto <strong>"${productName}"</strong>?`;
+                    } else {
+                        modalTextElement.innerHTML = `Tem certeza que deseja <strong>ATIVAR</strong> o produto <strong>"${productName}"</strong>?`;
+                    }
+                    modalHiddenInputElement.value = productId;
+                });
+
+                confirmButton.addEventListener('click', function() {
+                    statusForm.submit();
+                });
+            }
+        });
+    </script>
+}
+
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+
+<nav aria-label="Paginação de produtos">
+    <ul class="pagination justify-content-center">
+        <li class="page-item @prevDisabled">
+            <a asp-action="Index"
+               asp-route-pageNumber="@(Model.PageIndex - 1)"
+               asp-route-filtroTitulo="@Context.Request.Query["filtroTitulo"]"
+               asp-route-filtroEdicao="@Context.Request.Query["filtroEdicao"]"
+               class="page-link">Anterior</a>
+        </li>
+        <li class="page-item @nextDisabled">
+            <a asp-action="Index"
+               asp-route-pageNumber="@(Model.PageIndex + 1)"
+               asp-route-filtroTitulo="@Context.Request.Query["filtroTitulo"]"
+               asp-route-filtroEdicao="@Context.Request.Query["filtroEdicao"]"
+               class="page-link">Próxima</a>
+        </li>
+    </ul>
+</nav>

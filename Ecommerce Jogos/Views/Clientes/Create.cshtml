@@ -1,0 +1,270 @@
+﻿@model Ecommerce_Jogos.Models.ClienteFormViewModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    ViewData["Title"] = "Cadastro de Cliente";
+}
+
+<h1>@ViewData["Title"]</h1>
+<hr />
+
+<form asp-action="Create" id="cliente-form">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div id="business-alerts" class="alert alert-danger" style="display: none;"></div>
+
+    <fieldset class="mb-4 p-3 border rounded">
+        <legend class="w-auto px-2">Dados Pessoais e de Acesso</legend>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="NomeCompleto">Nome Completo</label>
+                <input asp-for="NomeCompleto" class="form-control" />
+                <span asp-validation-for="NomeCompleto" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="CPF">CPF</label>
+                <input asp-for="CPF" class="form-control" />
+                <span asp-validation-for="CPF" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="DataNascimento">Data de Nascimento</label>
+                <input asp-for="DataNascimento" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                <span asp-validation-for="DataNascimento" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="Genero">Gênero</label>
+                <select asp-for="Genero" class="form-select">
+                    <option value="">Selecione...</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Feminino">Feminino</option>
+                    <option value="Outro">Outro</option>
+                    <option value="Prefiro não dizer">Prefiro não dizer</option>
+                </select>
+                <span asp-validation-for="Genero" class="text-danger"></span>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label asp-for="Tipo_TelefoneID">Tipo de Telefone</label>
+                <select asp-for="Tipo_TelefoneID" class="form-select" asp-items="@ViewBag.TiposTelefone">
+                    <option value="">Selecione...</option>
+                </select>
+                <span asp-validation-for="Tipo_TelefoneID" class="text-danger"></span>
+            </div>
+            <div class="col-md-2 mb-3">
+                <label asp-for="DDD">DDD</label>
+                <input asp-for="DDD" class="form-control" />
+                <span asp-validation-for="DDD" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="Numero">Número</label>
+                <input asp-for="Numero" class="form-control" />
+                <span asp-validation-for="Numero" class="text-danger"></span>
+            </div>
+            <div class="col-md-12 mb-3">
+                <label asp-for="Email">E-mail</label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="Senha">Senha</label>
+                <input asp-for="Senha" class="form-control" />
+                <span asp-validation-for="Senha" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="ConfirmarSenha">Confirmar Senha</label>
+                <input asp-for="ConfirmarSenha" class="form-control" />
+                <span asp-validation-for="ConfirmarSenha" class="text-danger"></span>
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset class="mb-4 p-3 border rounded">
+        <legend class="w-auto px-2">Endereços</legend>
+        <span asp-validation-for="Enderecos" class="text-danger d-block mb-2 fw-bold"></span>
+        <div id="lista-enderecos"><p>Nenhum endereço adicionado.</p></div>
+        <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#enderecoModal">
+            <i class="bi bi-plus-circle"></i> Adicionar Endereço
+        </button>
+    </fieldset>
+
+    <fieldset class="mb-4 p-3 border rounded">
+        <legend class="w-auto px-2">Cartões de Crédito</legend>
+        <span asp-validation-for="Cartoes" class="text-danger d-block mb-2 fw-bold"></span>
+        <div id="lista-cartoes"><p>Nenhum cartão adicionado.</p></div>
+        <button type="button" class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#cartaoModal">
+            <i class="bi bi-plus-circle"></i> Adicionar Cartão
+        </button>
+    </fieldset>
+
+    <div class="form-group mt-4">
+        <input type="submit" value="Salvar Cliente" class="btn btn-primary" />
+        @if(User.Identity.IsAuthenticated)
+        {
+            @if (User.FindFirst("UserType").Value == "Administrador")
+            {
+                <a asp-controller="Clientes" asp-action="Index" class="btn btn-light">Cancelar</a>
+            }
+        }
+        else
+        {
+            <a asp-controller="Produtos" asp-action="Catalogo" class="btn btn-light">Cancelar</a>
+        }
+    </div>
+</form>
+
+<div class="modal fade" id="enderecoModal" tabindex="-1" aria-labelledby="enderecoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form id="form-endereco">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="enderecoModalLabel">Adicionar/Editar Endereço</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="enderecoId" />
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="apelido" class="form-label">Apelido (Ex: Casa, Trabalho)</label>
+                            <input type="text" id="apelido" class="form-control" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="cep" class="form-label">CEP</label>
+                            <input type="text" id="cep" class="form-control" required />
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="logradouro" class="form-label">Logradouro</label>
+                            <input type="text" id="logradouro" class="form-control" required />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="numero" class="form-label">Número</label>
+                            <input type="text" id="numero" class="form-control" required />
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            <label for="bairro" class="form-label">Bairro</label>
+                            <input type="text" id="bairro" class="form-control" required />
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="cidadeId" class="form-label">Cidade</label>
+                            <select id="cidadeId" class="form-select" required>
+                                <option value="">Selecione...</option>
+                                @if (ViewBag.Cidades != null)
+                                {
+                                    foreach (var item in (SelectList)ViewBag.Cidades)
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="tipoEnderecoId" class="form-label">Tipo de Endereço</label>
+                            <select id="tipoEnderecoId" class="form-select" required>
+                                <option value="">Selecione...</option>
+                                @if (ViewBag.TiposEndereco != null)
+                                {
+                                    foreach (var item in (SelectList)ViewBag.TiposEndereco)
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="tipoResidenciaId" class="form-label">Tipo de Residência</label>
+                            <select id="tipoResidenciaId" class="form-select" required>
+                                <option value="">Selecione...</option>
+                                @if (ViewBag.TiposResidencia != null)
+                                {
+                                    foreach (var item in (SelectList)ViewBag.TiposResidencia)
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="tipoLogradouroId" class="form-label">Tipo de Logradouro</label>
+                            <select id="tipoLogradouroId" class="form-select" required>
+                                <option value="">Selecione...</option>
+                                @if (ViewBag.TiposLogradouro != null)
+                                {
+                                    foreach (var item in (SelectList)ViewBag.TiposLogradouro)
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="observacao" class="form-label">Observação (Complemento)</label>
+                            <textarea id="observacao" class="form-control"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="submit" id="btnSalvarEndereco" class="btn btn-primary">Salvar Endereço</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="cartaoModal" tabindex="-1" aria-labelledby="cartaoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="form-cartao">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cartaoModalLabel">Adicionar Cartão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="cartaoId" />
+                    <div class="form-group mb-2">
+                        <label for="numeroCartao" class="form-label">Número do Cartão</label>
+                        <input type="text" id="numeroCartao" class="form-control" required />
+                        <span id="numero-cartao-error" class="text-danger" style="display: none; font-size: 0.875em;">O número do cartão deve ter 16 dígitos.</span>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label for="nomeImpresso" class="form-label">Nome Impresso no Cartão</label>
+                        <input type="text" id="nomeImpresso" class="form-control" required />
+                    </div>
+                    <div class="form-group mb-2">
+                        <label for="dataValidadeCartao" class="form-label">Data de Validade (MM/AAAA)</label>
+                        <input type="text" id="dataValidadeCartao" class="form-control" placeholder="MM/AAAA" required />
+                        <span id="data-validade-error" class="text-danger" style="display: none; font-size: 0.875em;">Digite um valor válido para a validade.</span>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label for="bandeira" class="form-label">Bandeira</label>
+                        <select id="bandeira" class="form-select" required>
+                            <option value="">Selecione...</option>
+                            <option value="Visa">Visa</option>
+                            <option value="Mastercard">Mastercard</option>
+                            <option value="Elo">Elo</option>
+                            <option value="American Express">American Express</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label for="cvv" class="form-label">CVV</label>
+                        <input type="text" id="cvv" class="form-control" required />
+                        <span id="cvv-error" class="text-danger" style="display: none; font-size: 0.875em;">CVV incorreto.</span>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="preferencial">
+                        <label class="form-check-label" for="preferencial">Definir como cartão preferencial</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="submit" id="btnSalvarCartao" class="btn btn-primary">Salvar Cartão</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="/js/cliente-form.js"></script>
+}

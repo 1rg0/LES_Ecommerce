@@ -1,0 +1,216 @@
+﻿@model CarrinhoViewModel
+@{
+    ViewData["Title"] = "Meu Carrinho de Compras";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-4">@ViewData["Title"]</h1>
+
+    <div class="row">
+        <div class="col-md-8">
+            <h4>Itens no seu carrinho (<span id="item-count">@Model.Itens.Count</span>)</h4>
+            <hr/>
+            <div id="carrinho-itens">
+                @if (Model.Itens.Any())
+                {
+                    @foreach (var item in Model.Itens)
+                    {
+                        <div class="card mb-3">
+                            <div class="card-body">
+                            
+                                <div class="d-flex justify-content-between">
+                                    <div class="d-flex flex-row align-items-center">
+                                        <div>
+                                            <img src="@(string.IsNullOrEmpty(item.UrlImagem) ? "https://placehold.co/100x150/2a2a2a/ffffff?text=Capa" : item.UrlImagem)" class="img-fluid rounded-3" alt="Capa do Jogo" style="height: 150px; width: auto;">
+                                        </div>
+                                        <div class="ms-3">
+                                            <h5>@item.NomeProduto</h5>
+                                            <p class="small mb-0">ID: @item.ProdutoId</p>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex flex-row align-items-center" data-produto-id="@item.ProdutoId">
+                                        <div style="width: 120px;">
+                                            <label for="quantidade-@item.ProdutoId" class="form-label visually-hidden">Quantidade</label>
+                                            <div class="input-group">
+                                                <button class="btn btn-outline-secondary btn-update-qty" type="button" data-change="-1">-</button>
+                                                <input id="quantidade-@item.ProdutoId" type="number" class="form-control text-center qty-input" value="@item.Quantidade" />
+                                                <button class="btn btn-outline-secondary btn-update-qty" type="button" data-change="1">+</button>
+                                            </div>
+                                        </div>
+                                        <div style="width: 100px;" class="ms-4">
+                                            <h5 class="mb-0" id="subtotal-@item.ProdutoId">@item.Subtotal.ToString("C")</h5>
+                                        </div>
+                                        <a href="#!" class="ms-3 remove-from-cart-btn" data-produto-id="@item.ProdutoId" style="color: #d9534f;">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="alert alert-secondary">
+                        Seu carrinho de compras está vazio.
+                    </div>
+                }
+            </div>
+            <a asp-controller="Produtos" asp-action="Catalogo" class="text-body"><i class="fas fa-long-arrow-alt-left me-2"></i> Continuar Comprando</a>
+            
+        </div>
+
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h4 class="mb-4">Resumo do Pedido</h4>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal</span>
+                        <span id="subtotal-carrinho">@Model.Total.ToString("C")</span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="cep" class="form-label">Calcular Frete</label>
+                        <div class="input-group">
+                            <input type="text" id="cep" class="form-control" placeholder="Digite seu CEP">
+                            <button class="btn btn-outline-secondary" type="button">Calcular</button>
+                        </div>
+                        @* <small class="text-muted">Frete: R$ 15,50</small> *@
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div id="linha-desconto" class="d-flex justify-content-between text-success" style="display: none;">
+                        <span>Desconto (<small id="codigo-cupom-aplicado"></small>)</span>
+                        <span id="valor-desconto"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between fw-bold">
+                        <span>TOTAL</span>
+                        <span id="total-carrinho">@Model.Total.ToString("C")</span>
+                    </div>
+
+                    <a asp-controller="Checkout" asp-action="Index" class="btn btn-primary w-100 mt-4 btn-finalizar-compra @(Model.Itens.Any() ? "" : "disabled")">
+                        Finalizar Compra
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+    <script>
+        $(document).ready(function() {
+
+            function removerItem(produtoId, cardElement) {
+                $.ajax({
+                    url: '/Carrinho/Remover',
+                    type: 'POST',
+                    data: { produtoId: produtoId },
+                    success: function(response) {
+                        if(response.sucesso) {
+                            cardElement.fadeOut(300, function() {
+                                $(this).remove();
+
+                                $('#subtotal-carrinho').text(response.novoTotal);
+                                $('#total-carrinho').text(response.novoTotal);
+                                var itemCount = $('#carrinho-itens .card').length;
+                                $('#item-count').text(itemCount);
+
+                                if(itemCount === 0) {
+                                    $('#carrinho-itens').html('<div class="alert alert-secondary">Seu carrinho de compras está vazio.</div>');
+                                    $('.btn-finalizar-compra').addClass('disabled');
+                                }
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error("Erro ao remover item: " + xhr.responseText);
+                        alert("Ocorreu um erro ao remover o item do carrinho.");
+                    }
+                });
+            }
+
+            $('#carrinho-itens').on('click', '.remove-from-cart-btn', function(e) {
+                e.preventDefault();
+                var button = $(this);
+                var produtoId = button.data('produto-id');
+                var cardDoItem = button.closest('.card');
+                removerItem(produtoId, cardDoItem);
+            });
+
+            function updateCartQuantity(produtoId, novaQuantidade, qtyInputElement) {
+                 var quantidadeAntiga = parseInt(qtyInputElement.attr('data-old-qty'));
+
+                $.ajax({
+                    url: '/Carrinho/AtualizarQuantidade',
+                    type: 'POST',
+                    data: {
+                        produtoId: produtoId,
+                        novaQuantidade: novaQuantidade
+                    },
+
+                    success: function(response) {
+                        if (response.sucesso) {
+                            qtyInputElement.val(novaQuantidade);
+                            qtyInputElement.attr('data-old-qty', novaQuantidade);
+                            $('#subtotal-' + produtoId).text(response.novoSubtotal);
+                            $('#subtotal-carrinho').text(response.novoTotal);
+                            $('#total-carrinho').text(response.novoTotal);
+                        }
+
+                    },
+
+                    error: function(xhr) {
+                        console.error("Erro ao atualizar quantidade: " + xhr.responseText);
+                        alert("Erro: " + xhr.responseText);
+                        qtyInputElement.val(quantidadeAntiga);
+                    }
+                });
+            }
+
+            $('#carrinho-itens').on('click', '.btn-update-qty', function() {
+                var button = $(this);
+                var container = button.closest('.d-flex[data-produto-id]');
+                var produtoId = container.data('produto-id');
+                var qtyInput = container.find('.qty-input');
+                var currentQty = parseInt(qtyInput.val());
+                var change = parseInt(button.data('change'));
+                var newQty = currentQty + change;
+
+                if (newQty < 1) {
+                    var cardDoItem = button.closest('.card');
+                    removerItem(produtoId, cardDoItem);
+                } else {
+                    qtyInput.attr('data-old-qty', currentQty);
+                    updateCartQuantity(produtoId, newQty, qtyInput);
+                }
+            });
+
+            $('#carrinho-itens').on('change', '.qty-input', function() {
+                var qtyInput = $(this);
+                var container = qtyInput.closest('.d-flex[data-produto-id]');
+                var produtoId = container.data('produto-id');
+                var newQty = parseInt(qtyInput.val());
+
+                if (newQty < 1) {
+   
+                    var cardDoItem = qtyInput.closest('.card');
+                    removerItem(produtoId, cardDoItem);
+                } else {
+                    updateCartQuantity(produtoId, newQty, qtyInput);
+                }
+            });
+
+            $('#carrinho-itens').on('focus', '.qty-input', function() {
+                var qtyInput = $(this);
+                qtyInput.attr('data-old-qty', qtyInput.val());
+            });
+
+        });
+    </script>
+}

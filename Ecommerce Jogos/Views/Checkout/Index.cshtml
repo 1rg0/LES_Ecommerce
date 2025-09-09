@@ -1,0 +1,155 @@
+﻿@model CheckoutViewModel
+@{
+    ViewData["Title"] = "Finalizar Compra";
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<div class="container mt-4">
+    <h1>@ViewData["Title"]</h1>
+    <p>Revise e confirme os detalhes da sua compra.</p>
+
+    <form asp-controller="Pedidos" asp-action="Processar" method="post">
+
+        <div class="row g-5">
+
+            <div class="col-md-7">
+                <h4 class="mb-3">1. Endereço de Entrega</h4>
+                <div class="card">
+                    <div class="card-body" id="address-selection">
+                        @foreach (var endereco in Model.Enderecos)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input address-radio" type="radio" name="EnderecoSelecionadoId" id="endereco-@endereco.ID" value="@endereco.ID">
+                                <label class="form-check-label" for="endereco-@endereco.ID">
+                                    <strong>@endereco.Apelido</strong><br>
+                                    @endereco.Tipo_Logradouro.Tipo @endereco.Logradouro, @endereco.Numero<br>
+                                    @endereco.Bairro, @endereco.Cidade.Nome - @endereco.Cidade.Estado.UF, CEP: @endereco.CEP
+                                </label>
+                            </div>
+                            @if (endereco != Model.Enderecos.Last())
+                            {
+                                <hr>
+                            }
+                        }
+                        <a asp-controller="Enderecos" asp-action="Create" asp-route-clienteId="@ViewBag.ClienteId" asp-route-returnUrl="@Url.Action("Index", "Checkout")" class="btn btn-outline-secondary mt-3">Adicionar Novo Endereço</a>
+                    </div>
+                </div>
+
+                <h4 class="mt-4 mb-3">2. Forma de Pagamento</h4>
+                <div class="card">
+                    <div class="card-body">
+                        <h6>Selecione um ou mais cartões</h6>
+                        <div id="lista-cartoes-pagamento">
+                            @foreach (var cartao in Model.Cartoes)
+                            {
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input cartao-checkbox" type="checkbox" value="@cartao.ID" id="cartao-@cartao.ID">
+                                    <label class="form-check-label" for="cartao-@cartao.ID">
+                                        <strong>@cartao.Bandeira - Final **** @cartao.UltimosQuatroDigitos</strong>
+                                        @if (cartao.Preferencial)
+                                        {
+                                            <span class="badge bg-success ms-1">Preferencial</span>
+                                        }
+                                    </label>
+
+                                    <div class="input-group mt-2" id="valor-cartao-@cartao.ID" style="display: none;">
+                                        <input type="hidden" class="cartao-id-hidden" value="@cartao.ID" />
+                                        <span class="input-group-text">R$</span>
+                                        <input type="text" class="form-control valor-pagamento money-mask" placeholder="Valor a pagar">
+                                    </div>
+                                    <small id="error-cartao-@cartao.ID" class="text-danger"></small>
+                                </div>
+                                @if (cartao != Model.Cartoes.Last())
+                                {
+                                    <hr>
+                                }
+                            }
+                        </div>
+                        <a asp-controller="Cartoes" asp-action="Create" asp-route-clienteId="@ViewBag.ClienteId" asp-route-returnUrl="@Url.Action("Index", "Checkout")" class="btn btn-outline-secondary mt-3">Adicionar Novo Cartão</a>
+                        <hr>
+                        <h6>Cupons de Desconto / Troca</h6>
+                        <div class="mb-2">
+                            <div class="input-group">
+                                <input type="text" id="cupom-input" class="form-control" placeholder="Digite um cupom">
+                                <button id="btn-aplicar-cupom" class="btn btn-outline-secondary" type="button">Aplicar</button>
+                            </div>
+                            <div id="cupom-mensagem" class="mt-1" style="font-size: 0.875em;"></div>
+                        </div>
+                        <div id="cupons-aplicados-lista"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <h4 class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-primary">Resumo do Pedido</span>
+                </h4>
+                <ul class="list-group mb-3">
+                    @foreach (var item in Model.Carrinho.Itens)
+                    {
+                        <li class="list-group-item d-flex justify-content-between lh-sm">
+                            <div>
+                                <h6 class="my-0">@item.NomeProduto</h6>
+                                <small class="text-muted">Quantidade: @item.Quantidade</small>
+                            </div>
+                            <span class="text-muted">@item.Subtotal.ToString("C")</span>
+                        </li>
+                    }
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Subtotal</span>
+                        <strong id ="subtotal-carrinho">@Model.Carrinho.Total.ToString("C")</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Frete</span>
+                        <strong id="frete-valor">Selecione um endereço</strong>
+                    </li>
+                    @if (Model.ValorDesconto > 0)
+                    {
+                        <li id="linha-desconto" class="list-group-item d-flex justify-content-between bg-light">
+                            <div class="text-success">
+                                <h6 class="my-0">Desconto Total</h6>
+                            </div>
+                            <span id="valor-desconto" class="text-success">-@Model.ValorDesconto.ToString("C")</span>
+                        </li>
+                    }
+                    else
+                    {
+                        <li id="linha-desconto" class="list-group-item d-flex justify-content-between bg-light" style="display: none;">
+                            <div class="text-success">
+                                <h6 class="my-0">Desconto Total</h6>
+                            </div>
+                            <span id="valor-desconto" class="text-success"></span>
+                        </li>
+                    }
+
+                    <li class="list-group-item d-flex justify-content-between">
+                        <h4>Total (BRL)</h4>
+                        <h4 id="total-com-frete"><strong>@((Model.Carrinho.Total - Model.ValorDesconto).ToString("C"))</strong></h4>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Valor Pago</span>
+                        <strong id="valor-pago-resumo">R$ 0,00</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Valor Restante</span>
+                        <strong id="valor-restante-resumo">@((Model.Carrinho.Total - Model.ValorDesconto).ToString("C"))</strong>
+                    </li>
+                </ul>
+                <div id="hidden-cupons-container"></div>
+                <button type="submit" class="btn btn-primary btn-lg w-100">Finalizar e Pagar</button>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+@section Scripts 
+{
+    <script src="~/js/checkout.js" asp-append-version="true"></script>
+}

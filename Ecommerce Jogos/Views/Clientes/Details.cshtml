@@ -1,0 +1,201 @@
+﻿@using System.Security.Claims
+@model Ecommerce_Jogos.Models.Cliente
+
+@{
+    ViewData["Title"] = "Detalhes do Cliente";
+    var userType = User.FindFirst("UserType")?.Value;
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="mb-0">Detalhes do Cliente</h1>
+        <p class="lead text-muted">@Model.NomeCompleto</p>
+    </div>
+    <div>
+        @if (userType == "Cliente")
+        {
+            <a asp-controller="Produtos" asp-action="Catalogo" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar ao Catálogo
+            </a>
+        }
+        else
+        {
+            <a asp-controller="Clientes" asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar para a lista
+            </a>
+        }
+    </div>
+</div>
+<hr />
+
+<div class="row g-4">
+    <div class="col-lg-8">
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Dados Pessoais e Contato</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Nome Completo:</strong> @Model.NomeCompleto</p>
+                        <p><strong>CPF:</strong> @Model.CPF</p>
+                        <p><strong>E-mail:</strong> @Model.Email</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Data de Nascimento:</strong> @Model.DataNascimento.ToString("dd/MM/yyyy")</p>
+                        <p><strong>Gênero:</strong> @Model.Genero</p>
+                        @foreach (var telefone in Model.Telefones)
+                        {
+                            <p><strong>Telefone:</strong> (@telefone.DDD) @telefone.Numero (@telefone.Tipo_Telefone.Tipo)</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Endereços</h5>
+                <a asp-controller="Enderecos" asp-action="Index" asp-route-clienteId="@Model.Id" class="btn btn-sm btn-outline-primary">Gerenciar Endereços</a>
+            </div>
+            <div class="card-body">
+                @if (Model.Enderecos.Any())
+                {
+                    <div class="row">
+                        @foreach (var endereco in Model.Enderecos)
+                        {
+                            <div class="col-md-6 mb-3">
+                                <div class="border p-3 rounded h-100">
+                                    <h6>@endereco.Apelido <span class="badge bg-info fw-normal">@endereco.Tipo_Endereco.Tipo</span></h6>
+                                    <small class="text-muted">
+                                        @endereco.Tipo_Logradouro.Tipo @endereco.Logradouro, @endereco.Numero<br>
+                                        @endereco.Bairro, @endereco.Cidade.Nome - @endereco.Cidade.Estado.UF<br>
+                                        CEP: @endereco.CEP
+                                    </small>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">Nenhum endereço cadastrado.</p>
+                }
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">Histórico de Pedidos</h5>
+            </div>
+            @if (Model.Pedidos.Any())
+            {
+                <table class="table table-striped table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>ID do Pedido</th>
+                            <th>Data</th>
+                            <th>Valor Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var pedido in Model.Pedidos.OrderByDescending(p => p.ID))
+                        {
+                            <tr style="cursor: pointer;" onclick="window.location='@Url.Action("Details", "Pedidos", new { id = pedido.ID })'">
+                                <td>#@pedido.ID</td>
+                                <td>@pedido.DataPedido.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>@pedido.ValorTotal.ToString("C")</td>
+                                <td><span class="badge bg-secondary">@pedido.Status</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="card-body text-center">
+                    <p class="text-muted mb-0">Nenhum pedido realizado por este cliente.</p>
+                </div>
+            }
+        </div>
+
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Ações</h5>
+            </div>
+            <div class="card-body">
+                @if (userType != "Cliente")
+                {
+                    <p class="card-text">
+                        <strong>Status do Cadastro:</strong>
+                        @if (Model.Ativo)
+                        {
+                            <span class="badge bg-success">Ativo</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Inativo</span>
+                        }
+                    </p>
+                    <hr>
+                }
+
+                <div class="d-grid gap-2">
+                    <a asp-action="Edit" asp-controller="Clientes" asp-route-id="@Model.Id" class="btn btn-primary">Editar Cadastro</a>
+                    <a asp-action="AlterarSenha" asp-controller="Clientes" asp-route-id="@Model.Id" class="btn btn-warning">Alterar Senha</a>
+                    @if (userType != "Cliente")
+                    {
+                        <form asp-action="ToggleStatus" asp-route-id="@Model.Id" method="post" class="d-grid">
+                            @if (Model.Ativo)
+                            {
+                                <button type="submit" class="btn btn-danger">Inativar Cliente</button>
+                            }
+                            else
+                            {
+                                <button type="submit" class="btn btn-success">Ativar Cliente</button>
+                            }
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Cartões</h5>
+                <a asp-controller="Cartoes" asp-action="Index" asp-route-clienteId="@Model.Id" class="btn btn-sm btn-outline-primary">Gerenciar</a>
+            </div>
+            <ul class="list-group list-group-flush">
+                @if (Model.Cartoes.Any())
+                {
+                    @foreach (var cartao in Model.Cartoes)
+                    {
+                        <li class="list-group-item">
+                            @cartao.Bandeira - Final **** @cartao.UltimosQuatroDigitos
+                            @if (cartao.Preferencial)
+                            {
+                                <span class="badge bg-success float-end">Preferencial</span>
+                            }
+                        </li>
+                    }
+                }
+                else
+                {
+                    <li class="list-group-item text-muted">Nenhum cartão cadastrado.</li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>

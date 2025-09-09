@@ -1,0 +1,18 @@
+﻿@{
+    ViewData["Title"] = "Pedido Confirmado!";
+}
+
+<div class="container text-center my-5">
+    <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+    <h1 class="display-4 mt-3">Obrigado pela sua compra!</h1>
+    <p class="lead">Seu pedido foi recebido e está em processamento.</p>
+    <p>
+        O número do seu pedido é: <strong>#@ViewBag.PedidoId</strong>
+    </p>
+    <hr>
+    <p>Você pode acompanhar o status do seu pedido na sua área de cliente.</p>
+    <div>
+        <a asp-controller="Produtos" asp-action="Catalogo" class="btn btn-primary btn-lg mt-3">Continuar Comprando</a>
+        <a asp-controller="Clientes" asp-action="Details" asp-route-id="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value" class="btn btn-outline-secondary btn-lg mt-3">Ver Meus Pedidos</a>
+    </div>
+</div>

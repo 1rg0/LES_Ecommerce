@@ -1,0 +1,151 @@
+﻿@model Ecommerce_Jogos.Models.ProdutoCreateViewModel
+@{
+    ViewData["Title"] = "Cadastrar Novo Produto";
+}
+
+<h1>@ViewData["Title"]</h1>
+<p>Preencha os dados abaixo para adicionar um novo jogo ao catálogo.</p>
+<hr />
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="form-group mb-3">
+                <label asp-for="Nome" class="form-label"></label>
+                <input asp-for="Nome" class="form-control" />
+                <span asp-validation-for="Nome" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Sinopse" class="form-label"></label>
+                <textarea asp-for="Sinopse" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="Sinopse" class="text-danger"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 form-group mb-3">
+                    <label asp-for="PlataformaID" class="form-label"></label>
+                    <select asp-for="PlataformaID" class="form-select" asp-items="@ViewBag.Plataformas">
+                        <option value="">Selecione...</option>
+                    </select>
+                    <span asp-validation-for="PlataformaID" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 form-group mb-3">
+                    <label asp-for="AnoLancamento" class="form-label"></label>
+                    <input asp-for="AnoLancamento" class="form-control" />
+                    <span asp-validation-for="AnoLancamento" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 form-group mb-3">
+                    <label asp-for="DesenvolvedoraID" class="form-label"></label>
+                    <select asp-for="DesenvolvedoraID" class="form-select" asp-items="@ViewBag.Desenvolvedoras">
+                        <option value="">Selecione...</option>
+                    </select>
+                    <span asp-validation-for="DesenvolvedoraID" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 form-group mb-3">
+                    <label asp-for="PublicadoraID" class="form-label"></label>
+                    <select asp-for="PublicadoraID" class="form-select" asp-items="@ViewBag.Publicadoras">
+                        <option value="">Selecione...</option>
+                    </select>
+                    <span asp-validation-for="PublicadoraID" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="Edicao" class="form-label"></label>
+                <input asp-for="Edicao" class="form-control" placeholder="Ex: Edição Padrão, Edição de Colecionador..." />
+                <span asp-validation-for="Edicao" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="URLImagem" class="form-label"></label>
+                <input asp-for="URLImagem" class="form-control" placeholder="https://exemplo.com/imagem.jpg" />
+                <span asp-validation-for="URLImagem" class="text-danger"></span>
+            </div>
+
+            <hr />
+            <h5 class="mt-3">Dimensões e Peso</h5>
+            <div class="row">
+                <div class="col-md-3 form-group mb-3">
+                    <label asp-for="AlturaCm" class="form-label"></label>
+                    <input asp-for="AlturaCm" type="text" class="form-control dimension-mask" />
+                    <span asp-validation-for="AlturaCm" class="text-danger"></span>
+                </div>
+                <div class="col-md-3 form-group mb-3">
+                    <label asp-for="LarguraCm" class="form-label"></label>
+                    <input asp-for="LarguraCm" type="text" class="form-control dimension-mask" />
+                    <span asp-validation-for="LarguraCm" class="text-danger"></span>
+                </div>
+                <div class="col-md-3 form-group mb-3">
+                    <label asp-for="ProfundidadeCm" class="form-label"></label>
+                    <input asp-for="ProfundidadeCm" type="text" class="form-control dimension-mask" />
+                    <span asp-validation-for="ProfundidadeCm" class="text-danger"></span>
+                </div>
+                <div class="col-md-3 form-group mb-3">
+                    <label asp-for="PesoGramas" class="form-label"></label>
+                    <input asp-for="PesoGramas" type="text" class="form-control dimension-mask" />
+                    <span asp-validation-for="PesoGramas" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="p-3 border rounded mb-3">
+                <h5>Categorias</h5>
+                <hr />
+                <div style="max-height: 200px; overflow-y: auto;">
+                    @{
+                        foreach (var categoria in ViewBag.Categorias as List<Categoria>)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="CategoriaIDs" value="@categoria.ID" id="cat-@categoria.ID">
+                                <label class="form-check-label" for="cat-@categoria.ID">@categoria.Nome</label>
+                            </div>
+                        }
+                    }
+                </div>
+                <span asp-validation-for="CategoriaIDs" class="text-danger"></span>
+            </div>
+
+            <div class="p-3 border rounded">
+                <h5>Preço e Código</h5>
+                <hr />
+                <div class="form-group mb-3">
+                    <label asp-for="GrupoPrecificacaoID" class="form-label"></label>
+                    <select asp-for="GrupoPrecificacaoID" class="form-select" asp-items="ViewBag.GruposPrecificacao">
+                        <option value="">Selecione...</option>
+                    </select>
+                    <span asp-validation-for="GrupoPrecificacaoID" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="CodigoBarras" class="form-label"></label>
+                    <input asp-for="CodigoBarras" class="form-control" />
+                    <span asp-validation-for="CodigoBarras" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr />
+    <div class="form-group mt-4">
+        <input type="submit" value="Salvar Produto" class="btn btn-primary" />
+        <a asp-controller="Produtos" asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function(){
+            $('.money-mask').mask('000.000.000.000.000,00', {reverse: true});
+            $('.dimension-mask').mask('000.000,00', {reverse: true});
+        });
+    </script>
+}

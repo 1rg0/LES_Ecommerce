@@ -1,0 +1,49 @@
+﻿@model Ecommerce_Jogos.Models.TelefoneCadastroViewModel
+
+@{
+    ViewData["Title"] = "Cadastro de Telefone";
+}
+
+<h1>@ViewData["Title"]</h1>
+<h4>Adicionando telefone para: <strong>@Model.ClienteNome</strong></h4>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <input type="hidden" asp-for="ClienteID" />
+
+            <div class="form-group">
+                <label asp-for="Tipo_TelefoneID"></label>
+                <select asp-for="Tipo_TelefoneID" class="form-control" asp-items="@ViewBag.TiposTelefone">
+                    <option value="">Selecione...</option>
+                </select>
+                <span asp-validation-for="Tipo_TelefoneID" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DDD"></label>
+                <input asp-for="DDD" class="form-control" />
+                <span asp-validation-for="DDD" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Numero"></label>
+                <input asp-for="Numero" class="form-control" />
+                <span asp-validation-for="Numero" class="text-danger"></span>
+            </div>
+
+            <br />
+            <div class="form-group">
+                <input type="submit" value="Próximo: Cadastrar Endereço" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

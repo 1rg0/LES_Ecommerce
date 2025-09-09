@@ -1,0 +1,50 @@
+﻿@model IEnumerable<Ecommerce_Jogos.Models.Produto>
+@{
+    ViewData["Title"] = "Gerenciamento de Estoque";
+    // Pega o dicionário de quantidades que veio do Controller
+    var quantidades = ViewBag.Quantidades as Dictionary<int, int>;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>@ViewData["Title"]</h1>
+    <div>
+        <a asp-controller="Estoque" asp-action="Create" class="btn btn-primary">
+            Registrar Entrada de Estoque
+        </a>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<p>Abaixo está a lista de produtos e suas quantidades atuais em estoque.</p>
+<hr />
+
+<table class="table table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Cód. Produto</th>
+            <th>Título do Jogo</th>
+            <th>Plataforma</th>
+            <th>Edição</th>
+            <th class="text-center">Quantidade em Estoque</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var produto in Model)
+        {
+            var qtd = quantidades.ContainsKey(produto.ID) ? quantidades[produto.ID] : 0;
+            <tr class="@(qtd == 0 ? "table-danger" : "")">
+                <td>@produto.ID</td>
+                <td>@produto.Nome</td>
+                <td>@produto.Plataforma.Nome</td>
+                <td>@produto.Edicao</td>
+                <td class="text-center">@qtd</td>
+            </tr>
+        }
+    </tbody>
+</table>

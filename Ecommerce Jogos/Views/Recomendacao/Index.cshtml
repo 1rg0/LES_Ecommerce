@@ -1,0 +1,142 @@
+﻿@{
+    ViewData["Title"] = "Recomendações com IA";
+}
+
+<div class="container my-4">
+    <div class="text-center mb-5">
+        <h1 class="display-4">Seu Assistente de Jogos</h1>
+        <p class="lead text-muted">Descubra seu próximo jogo favorito com a ajuda da nossa IA</p>
+    </div>
+
+    <h3 class="mb-3">Seus Jogos Recomendados</h3>
+    <div class="row flex-nowrap overflow-auto pb-3">
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+            <div class="card h-100">
+                <img src="https://placehold.co/300x450/5A9/FFF?text=Aventura" class="card-img-top" style="height: 250px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">God of War Ragnarok</h5>
+                    <p class="card-text">Playstation 5</p>
+                    <a href="#" class="btn btn-outline-primary btn-sm">Ver Detalhes</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+            <div class="card h-100">
+                <img src="https://placehold.co/300x450/A55/FFF?text=RPG" class="card-img-top" style="height: 250px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">Pokémon Legnds: Arceus</h5>
+                    <p class="card-text">Nintendo Switch</p>
+                    <a href="#" class="btn btn-outline-primary btn-sm">Ver Detalhes</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+            <div class="card h-100">
+                <img src="https://placehold.co/300x450/985/FFF?text=Corrida" class="card-img-top" style="height: 250px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">NFS Unbound</h5>
+                    <p class="card-text">Xbox Serie X|S</p>
+                    <a href="#" class="btn btn-outline-primary btn-sm">Ver Detalhes</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+            <div class="card h-100">
+                <img src="https://placehold.co/300x450/57A/FFF?text=Ação" class="card-img-top" style="height: 250px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">The Last of Us</h5>
+                    <p class="card-text">Playstation 4</p>
+                    <a href="#" class="btn btn-outline-primary btn-sm">Ver Detalhes</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-5">
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h3 class="text-center mb-3">Converse com Nosso Assistente</h3>
+            <div class="chat-container border rounded">
+                <div class="chat-messages p-3">
+                    <div class="message bot-message mb-2">
+                        Olá! Sou seu assistente de jogos. Como posso te ajudar hoje? Você pode pedir por uma plataforma, categoria ou até mesmo descrever o tipo de jogo que você gosta.
+                    </div>
+                    <div class="message user-message mb-2">
+                        Gostaria de um jogo de RPG parecido com "Pokémon".
+                    </div>
+                    <div class="message bot-message mb-2">
+                        Ótima escolha! Com base nisso, eu recomendo "Digimon Story Cyber Sleuth" de Playstation 4. É uma saga épica com um mundo vasto e um sistema de batalha complexo. Você gostaria de saber mais sobre o jogo?
+                    </div>
+                </div>
+                <div class="chat-input-area p-3 border-top">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Digite sua mensagem...">
+                        <button class="btn btn-primary" type="button">
+                            <i class="bi bi-send-fill"></i> Enviar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-5">
+        <h4>Ou explore por categorias populares</h4>
+        <div class="mt-3">
+            <a href="#" class="btn btn-secondary m-1">Ação</a>
+            <a href="#" class="btn btn-secondary m-1">Aventura</a>
+            <a href="#" class="btn btn-secondary m-1">RPG</a>
+            <a href="#" class="btn btn-secondary m-1">Corrida</a>
+            <a href="#" class="btn btn-secondary m-1">Tiro</a>
+        </div>
+    </div>
+</div>
+
+
+@section Styles {
+    <style>
+        .chat-container {
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            background-color: #f8f9fa;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .message {
+            padding: 10px 15px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .bot-message {
+            background-color: #e9ecef;
+            align-self: flex-start;
+            text-align: left;
+        }
+
+        .user-message {
+            background-color: #0d6efd;
+            color: white;
+            align-self: flex-end;
+            margin-left: auto; /* Alinha a mensagem do usuário à direita */
+            text-align: right;
+        }
+
+        .row.flex-nowrap {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        .row.flex-nowrap::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+    </style>
+}

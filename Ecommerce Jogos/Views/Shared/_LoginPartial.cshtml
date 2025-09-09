@@ -1,0 +1,43 @@
+﻿@using System.Security.Claims
+
+<ul class="navbar-nav">
+    @if (User.Identity.IsAuthenticated)
+    {
+        var userType = User.FindFirst("UserType")?.Value;
+        var fullName = User.FindFirst("FullName")?.Value;
+        var role = User.FindFirst(ClaimTypes.Role)?.Value;
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if(userType == "Cliente")
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-controller="Clientes" asp-action="Details" asp-route-id="@userId">
+                    Bem vindo(a), @fullName!
+                </a>
+            </li>
+        }
+        else
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-controller="Administrador" asp-action="AlterarSenha">
+                    Olá, @fullName!
+                </a>
+            </li>
+        }
+        <li class="nav-item">
+            <form class="form-inline" asp-controller="Conta" asp-action="Logout">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="nav-link btn btn-link text-dark">Sair</button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Conta" asp-action="Login">Entrar</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Clientes" asp-action="Create">Cadastrar</a>
+        </li>
+    }
+</ul>

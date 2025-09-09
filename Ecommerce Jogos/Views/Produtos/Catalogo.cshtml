@@ -1,0 +1,73 @@
+﻿@model CatalogoViewModel
+@{
+    ViewData["Title"] = "Catálogo de Produtos";
+}
+
+<div class="row">
+    <div class="col-md-3">
+        <h4>Filtros</h4>
+        <hr />
+        <form asp-action="Catalogo" method="get">
+            <div class="mb-3">
+                <label asp-for="SearchString" class="form-label">Buscar por nome</label>
+                <input asp-for="SearchString" class="form-control" placeholder="Ex: God of War...">
+            </div>
+            <div class="mb-3">
+                <label asp-for="PlataformaId" class="form-label">Plataforma</label>
+                <select asp-for="PlataformaId" class="form-select" asp-items="Model.Plataformas">
+                    <option value="">Todas</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Categorias</label>
+                @foreach (var categoria in Model.Categorias)
+                {
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="categoriaIds" value="@categoria.ID" id="cat-@categoria.ID"
+                               @(Model.CategoriaIds != null && Model.CategoriaIds.Contains(categoria.ID) ? "checked" : "") />
+                        <label class="form-check-label" for="cat-@categoria.ID">@categoria.Nome</label>
+                    </div>
+                }
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+            <a asp-action="Catalogo" class="btn btn-outline-secondary w-100 mt-2">Limpar Filtros</a>
+        </form>
+    </div>
+
+    <div class="col-md-9">
+        <h2>Nossos Produtos</h2>
+        <p>Os melhores jogos para seu console estão aqui!</p>
+        <hr />
+        <div class="row">
+            @if (!Model.Produtos.Any())
+            {
+                <div class="col-12">
+                    <p class="text-center text-muted">Nenhum produto encontrado com os filtros selecionados.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var produto in Model.Produtos)
+                {
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <img src="@(string.IsNullOrEmpty(produto.URLImagem) ? $"https://placehold.co/300x400/2a2a2a/ffffff?text={produto.Nome}" : produto.URLImagem)" class="card-img-top" alt="@produto.Nome" style="height: 300px; width: auto; margin: 0 auto;">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">@produto.Nome</h5>
+                                <p class="card-text"><span class="badge bg-primary">@produto.Plataforma.Nome</span></p>
+                                <p class="card-text">@produto.Edicao</p>
+                                <div class="mt-auto">
+                                    <h4 class="text-success">@produto.PrecoVenda.ToString("C")</h4>
+                                    <button type="button" class="btn btn-primary w-100 add-to-cart-btn" data-produto-id="@produto.ID">
+                                        Adicionar ao Carrinho
+                                    </button>
+                                    <a asp-controller="Produtos" asp-action="Details" asp-route-id="@produto.ID" class="btn btn-outline-secondary w-100 mt-2">Ver Detalhes</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

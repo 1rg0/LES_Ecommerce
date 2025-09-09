@@ -1,0 +1,176 @@
+﻿@model Ecommerce_Jogos.Models.ClienteEdicaoViewModel
+
+@{
+    ViewData["Title"] = "Editar Cliente";
+}
+
+<h1>Editar Cliente: @Model.NomeCompleto</h1>
+
+<form asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <input type="hidden" asp-for="ClienteID" />
+    <input type="hidden" asp-for="EnderecoID" />
+    <input type="hidden" asp-for="TelefoneID" />
+
+    <fieldset>
+        <legend>Dados Pessoais</legend>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="NomeCompleto" class="control-label"></label>
+                <input asp-for="NomeCompleto" class="form-control" />
+                <span asp-validation-for="NomeCompleto" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="CPF" class="control-label">CPF</label>
+                <input asp-for="CPF" class="form-control" />
+                <span asp-validation-for="CPF" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="DataNascimento" class="control-label"></label>
+                <input asp-for="DataNascimento" class="form-control" />
+                <span asp-validation-for="DataNascimento" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="Genero" class="control-label"></label>
+                <select asp-for="Genero" class="form-control">
+                    <option value="Masculino">Masculino</option>
+                    <option value="Feminino">Feminino</option>
+                    <option value="Outro">Outro</option>
+                    <option value="Prefiro não dizer">Prefiro não dizer</option>
+                </select>
+                <span asp-validation-for="Genero" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-2 mb-3">
+                <label asp-for="Tipo_TelefoneID" class="control-label"></label>
+                <select asp-for="Tipo_TelefoneID" class="form-control" asp-items="ViewBag.TiposTelefone"></select>
+                <span asp-validation-for="Tipo_TelefoneID" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-2 mb-3">
+                <label asp-for="DDD" class="control-label"></label>
+                <input asp-for="DDD" class="form-control" />
+                <span asp-validation-for="DDD" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-8 mb-3">
+                <label asp-for="NumeroTelefone" class="control-label"></label>
+                <input asp-for="NumeroTelefone" class="form-control" />
+                <span asp-validation-for="NumeroTelefone" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+        </div>
+
+    </fieldset>
+    <br />
+
+    <fieldset>
+        <legend>Endereço Principal</legend>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="Apelido" class="form-label"></label>
+                <input asp-for="Apelido" class="form-control" />
+                <span asp-validation-for="Apelido" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="CEP" class="form-label"></label>
+                <input asp-for="CEP" class="form-control" />
+                <span asp-validation-for="CEP" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-2 mb-3">
+                <label asp-for="Tipo_LogradouroID" class="form-label"></label>
+                <select asp-for="Tipo_LogradouroID" class="form-control" asp-items="ViewBag.TiposLogradouro"></select>
+                <span asp-validation-for="Tipo_LogradouroID" class="text-danger"></span>
+            </div>
+            <div class="col-md-8 mb-3">
+                <label asp-for="Logradouro" class="form-label"></label>
+                <input asp-for="Logradouro" class="form-control" />
+                <span asp-validation-for="Logradouro" class="text-danger"></span>
+            </div>
+            <div class="col-md-2 mb-3">
+                <label asp-for="Numero" class="form-label"></label>
+                <input asp-for="Numero" class="form-control" />
+                <span asp-validation-for="Numero" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="Bairro" class="form-label"></label>
+                <input asp-for="Bairro" class="form-control" />
+                <span asp-validation-for="Bairro" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="CidadeID" class="form-label"></label>
+                <select asp-for="CidadeID" class="form-control" asp-items="ViewBag.Cidades"></select>
+                <span asp-validation-for="CidadeID" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label asp-for="Tipo_EnderecoID" class="form-label"></label>
+                <select asp-for="Tipo_EnderecoID" class="form-control" asp-items="ViewBag.TiposEndereco"></select>
+                <span asp-validation-for="Tipo_EnderecoID" class="text-danger"></span>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label asp-for="Tipo_ResidenciaID" class="form-label"></label>
+                <select asp-for="Tipo_ResidenciaID" class="form-control" asp-items="ViewBag.TiposResidencia"></select>
+                <span asp-validation-for="Tipo_ResidenciaID" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Observacao" class="form-label"></label>
+            <textarea asp-for="Observacao" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="Observacao" class="text-danger"></span>
+        </div>
+    </fieldset>
+    <br />
+
+    <div class="form-group">
+        <input type="submit" value="Salvar Alterações" class="btn btn-success" />
+        <a asp-action="Details" asp-route-id="@Model.ClienteID" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function () {
+            $('#CEP').mask('00000-000');
+            $('#CPF').mask('000.000.000-00', { reverse: true });
+            $('#DDD').mask('00');
+            var options = {
+                onKeyPress: function (cep, e, field, options) {
+                    var masks = ['0000-00009', '00000-0000'];
+                    var mask = (cep.replace(/\D/g, '').length > 8) ? masks[1] : masks[0];
+                    $('#NumeroTelefone').mask(mask, options);
+                }
+            };
+            $('#NumeroTelefone').mask('00000-0009', options);
+
+        });
+    </script>
+}

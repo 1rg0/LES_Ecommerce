@@ -1,0 +1,96 @@
+﻿@model Produto
+@{
+    ViewData["Title"] = $"Detalhes de {Model.Nome}";
+    var quantidadeEmEstoque = ViewBag.QuantidadeEmEstoque;
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-5">
+            <img src="@(string.IsNullOrEmpty(Model.URLImagem) ? $"https://placehold.co/400x550/2a2a2a/ffffff?text={Model.Nome}" : Model.URLImagem)" class="img-fluid rounded" alt="Capa do Jogo @Model.Nome" style="height: 500px; width: auto; margin: 0 auto;">
+        </div>
+
+        <div class="col-md-7">
+            <h1>@Model.Nome</h1>
+            <p class="text-muted">@Model.Edicao | Plataforma: @Model.Plataforma.Nome</p>
+
+            <div class="mb-3">
+                @foreach (var categoria in Model.Categorias)
+                {
+                    <span class="badge bg-secondary me-1">@categoria.Nome</span>
+                }
+            </div>
+
+            <h2 class="text-success my-4">@Model.PrecoVenda.ToString("C")</h2>
+
+            @if (quantidadeEmEstoque > 0)
+            {
+                <p class= "text-success fw-bold" ><i class= "bi bi-check-circle-fill" ></i> Em estoque(@quantidadeEmEstoque unidades) </p>
+            }
+            else
+            {
+                <p class="text-danger fw-bold"><i class="bi bi-x-circle-fill"></i> Fora de estoque</p>
+            }
+
+            <div class="card p-3 bg-light">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <label for="quantidade" class="form-label">Quantidade:</label>
+                        <input type="number" id="quantidade-@Model.ID" class="form-control" value="1" min="1" max="@quantidadeEmEstoque" style="width: 80px;" @(quantidadeEmEstoque == 0 ? "disabled" : "")>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-lg flex-grow-1 add-to-cart-btn @(quantidadeEmEstoque == 0 ? "disabled" : "")" data-produto-id="@Model.ID">
+                        <i class="bi bi-cart-plus-fill"></i> Adicionar ao Carrinho
+                    </button>
+                </div>
+            </div>
+
+            <a asp-action="Catalogo" class="btn btn-outline-secondary mt-3">
+                <i class="bi bi-arrow-left"></i> Voltar ao Catálogo
+            </a>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-12">
+            <hr />
+            <h3>Mais sobre o jogo</h3>
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="sinopse-tab" data-bs-toggle="tab" data-bs-target="#sinopse" type="button" role="tab">Sinopse</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="detalhes-tab" data-bs-toggle="tab" data-bs-target="#detalhes" type="button" role="tab">Detalhes Técnicos</button>
+                </li>
+            </ul>
+            <div class="tab-content p-3 border-start border-end border-bottom" id="myTabContent">
+                <div class="tab-pane fade show active" id="sinopse" role="tabpanel">
+                    @Model.Sinopse
+                </div>
+                <div class="tab-pane fade" id="detalhes" role="tabpanel">
+                    <dl class="row">
+                        <dt class="col-sm-3">Desenvolvedora</dt>
+                        <dd class="col-sm-9">@Model.Desenvolvedora?.Nome</dd>
+
+                        <dt class="col-sm-3">Publicadora</dt>
+                        
+                        <dd class="col-sm-9">@Model.Publicadora?.Nome</dd>
+
+                        <dt class="col-sm-3">Ano de Lançamento</dt>
+                        <dd class="col-sm-9">@Model.AnoLancamento</dd>
+
+                        <dt class="col-sm-3">Dimensões (A x L x P)</dt>
+                        
+                        <dd class="col-sm-9">@($"{Model.AlturaCm}cm x {Model.LarguraCm}cm x {Model.ProfundidadeCm}cm")</dd>
+
+                        <dt class="col-sm-3">Peso</dt>
+                        
+                        <dd class="col-sm-9">@($"{Model.PesoGramas}g")</dd>
+
+                        <dt class="col-sm-3">Código de Barras</dt>
+                        <dd class="col-sm-9">@Model.CodigoBarras</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

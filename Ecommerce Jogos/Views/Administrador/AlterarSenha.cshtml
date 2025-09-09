@@ -1,0 +1,46 @@
+﻿@model Ecommerce_Jogos.Models.AlterarSenhaViewModel
+
+@{
+    ViewData["Title"] = "Alterar Senha do Administrador";
+}
+
+<h1>@ViewData["Title"]</h1>
+<p>Utilize o formulário para alterar sua senha de acesso.</p>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-controller="Administrador" asp-action="AlterarSenha" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <input type="hidden" asp-for="ClienteID" />
+
+            <div class="form-group mb-3">
+                <label asp-for="SenhaAtual">Senha Atual</label>
+                <input asp-for="SenhaAtual" class="form-control" />
+                <span asp-validation-for="SenhaAtual" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="NovaSenha">Nova Senha</label>
+                <input asp-for="NovaSenha" class="form-control" />
+                <span asp-validation-for="NovaSenha" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="ConfirmarNovaSenha">Confirmar Nova Senha</label>
+                <input asp-for="ConfirmarNovaSenha" class="form-control" />
+                <span asp-validation-for="ConfirmarNovaSenha" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Salvar Nova Senha" class="btn btn-primary" />
+                <a asp-controller="Clientes" asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
