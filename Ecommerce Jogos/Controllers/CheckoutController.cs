@@ -26,6 +26,41 @@ namespace Ecommerce_Jogos.Controllers
                 return RedirectToAction("Index", "Carrinho");
             }
 
+            if (carrinho.Itens.Any())
+            {
+                var mensagensNotificacao = new List<string>();
+                var itensParaRemover = new List<CarrinhoItemViewModel>();
+
+                foreach (var item in carrinho.Itens)
+                {
+                    var estoqueDisponivel = await _context.EntradasEstoque
+                                                          .Where(e => e.ProdutoID == item.ProdutoId)
+                                                          .SumAsync(e => e.Quantidade);
+
+                    if (estoqueDisponivel == 0)
+                    {
+                        mensagensNotificacao.Add($"O produto '{item.NomeProduto}' não está mais disponível em estoque e foi removido do seu carrinho.");
+                        itensParaRemover.Add(item);
+                    }
+                    else if (item.Quantidade > estoqueDisponivel)
+                    {
+                        mensagensNotificacao.Add($"A quantidade do produto '{item.NomeProduto}' foi ajustada para {estoqueDisponivel} unidade(s) devido à disponibilidade em estoque.");
+                        item.Quantidade = estoqueDisponivel;
+                    }
+                }
+
+                foreach (var item in itensParaRemover)
+                {
+                    carrinho.Itens.Remove(item);
+                }
+
+                if (mensagensNotificacao.Any())
+                {
+                    TempData["CarrinhoNotificacoes"] = mensagensNotificacao;
+                    SessionHelper.SetObjectAsJson(HttpContext.Session, "Carrinho", carrinho);
+                }
+            }
+
             var clienteIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (clienteIdClaim == null)
             {

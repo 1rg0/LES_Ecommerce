@@ -16,72 +16,46 @@ namespace Ecommerce_Jogos.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             var carrinho = SessionHelper.GetObjectFromJson<CarrinhoViewModel>(HttpContext.Session, "Carrinho") ?? new CarrinhoViewModel();
+
+            if (carrinho.Itens.Any())
+            {
+                var mensagensNotificacao = new List<string>();
+                var itensParaRemover = new List<CarrinhoItemViewModel>();
+
+                foreach (var item in carrinho.Itens)
+                {
+                    var estoqueDisponivel = await _context.EntradasEstoque
+                                                          .Where(e => e.ProdutoID == item.ProdutoId)
+                                                          .SumAsync(e => e.Quantidade);
+
+                    if (estoqueDisponivel == 0)
+                    {
+                        mensagensNotificacao.Add($"O produto '{item.NomeProduto}' não está mais disponível em estoque e foi removido do seu carrinho.");
+                        itensParaRemover.Add(item);
+                    }
+                    else if (item.Quantidade > estoqueDisponivel)
+                    {
+                        mensagensNotificacao.Add($"A quantidade do produto '{item.NomeProduto}' foi ajustada para {estoqueDisponivel} unidade(s) devido à disponibilidade em estoque.");
+                        item.Quantidade = estoqueDisponivel;
+                    }
+                }
+
+                foreach (var item in itensParaRemover)
+                {
+                    carrinho.Itens.Remove(item);
+                }
+
+                if (mensagensNotificacao.Any())
+                {
+                    TempData["CarrinhoNotificacoes"] = mensagensNotificacao;
+                    SessionHelper.SetObjectAsJson(HttpContext.Session, "Carrinho", carrinho);
+                }
+            }
+
             return View(carrinho);
-        }
-
-        public IActionResult Details(int id)
-        {
-            return View();
-        }
-
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Create(IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        public IActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        public IActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
         }
 
         [HttpPost]

@@ -231,6 +231,7 @@ namespace Ecommerce_Jogos.Controllers
             }
 
             await _context.SaveChangesAsync();
+            await SimularAprovacaoPagamento(novoPedido.ID);
 
             return RedirectToAction("Confirmacao", new { pedidoId = novoPedido.ID });
         }
@@ -296,7 +297,7 @@ namespace Ecommerce_Jogos.Controllers
             {
                 return NotFound();
             }
-            if (pedido.Status != "EM PROCESSAMENTO")
+            if (pedido.Status != "APROVADA")
             {
                 TempData["ErrorMessage"] = $"O pedido #{id} não pode ser despachado pois seu status atual é '{pedido.Status}'.";
                 return RedirectToAction(nameof(Index));
@@ -378,6 +379,16 @@ namespace Ecommerce_Jogos.Controllers
             var dadosAntigos = new { Status = pedido.Status };
 
             pedido.Status = "TROCA AUTORIZADA";
+
+            var novaNotificacao = new Notificacao
+            {
+                ClienteID = pedido.ClienteID,
+                Mensagem = $"Sua solicitação de troca para o pedido #{pedido.ID} foi autorizada.",
+                Url = Url.Action("Details", "Pedidos", new { id = pedido.ID }),
+                DataCriacao = DateTime.Now,
+                Lida = false
+            };
+            _context.Notificacoes.Add(novaNotificacao);
 
             await _logService.RegistrarLog(
                 adminId: GetCurrentAdminId(),
@@ -540,6 +551,74 @@ namespace Ecommerce_Jogos.Controllers
             }
 
             return null;
+        }
+
+        private async Task SimularAprovacaoPagamento(int pedidoId)
+        {
+            // Aguarda um tempo curto para simular a comunicação com a operadora
+            await Task.Delay(2000); // Espera 2 segundos
+
+            var pedido = await _context.Pedidos.FindAsync(pedidoId);
+            if (pedido == null || pedido.Status != "EM PROCESSAMENTO")
+            {
+                return; // Sai se o pedido não for encontrado ou já tiver sido processado
+            }
+
+            var pagamentos = await _context.PagamentosPedido
+                                           .Where(p => p.PedidoID == pedidoId)
+                                           .Include(p => p.Cartao)
+                                           .ToListAsync();
+
+            bool deveReprovar = false;
+            foreach (var pagamento in pagamentos)
+            {
+                if (pagamento.Cartao != null)
+                {
+                    var ultimosQuatro = pagamento.Cartao.UltimosQuatroDigitos;
+                    // RN0028 (Simulado) - Verifica se os 4 últimos dígitos são iguais
+                    if (ultimosQuatro.All(c => c == ultimosQuatro[0]))
+                    {
+                        deveReprovar = true;
+                        break; // Encontrou um motivo para reprovar, pode parar a verificação
+                    }
+                }
+            }
+
+            var dadosAntigos = new { Status = pedido.Status };
+            var novoStatus = deveReprovar ? "REPROVADA" : "APROVADA";
+            pedido.Status = novoStatus;
+
+            await _logService.RegistrarLog(
+                adminId: null, // Processo automático
+                tipoOperacao: "ALTERAÇÃO",
+                tabela: "Pedido",
+                registroId: pedido.ID,
+                dadosAntigos: dadosAntigos,
+                dadosNovos: new { Status = novoStatus },
+                motivo: "Resposta do operadora do cartão"
+            );
+
+            // Se o pagamento foi reprovado, retorna os itens ao estoque
+            if (deveReprovar)
+            {
+                var itensDoPedido = await _context.ItensPedido.Where(ip => ip.PedidoID == pedidoId).ToListAsync();
+                foreach (var item in itensDoPedido)
+                {
+                    var reentradaEstoque = new EntradaEstoque
+                    {
+                        ProdutoID = item.ProdutoID,
+                        Quantidade = item.Quantidade, // Quantidade positiva para reentrada
+                        ValorCusto = 0,
+                        DataEntrada = DateTime.Now,
+                        FornecedorID = null
+                    };
+                    _context.EntradasEstoque.Add(reentradaEstoque);
+                    // RN0028 - Desbloqueia e mantém em estoque
+                    await VerificarEstoque(item.ProdutoID);
+                }
+            }
+
+            await _context.SaveChangesAsync();
         }
     }
 }

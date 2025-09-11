@@ -1,0 +1,33 @@
+﻿@model IEnumerable<Ecommerce_Jogos.Models.Notificacao>
+
+<li class="nav-item dropdown">
+    <a class="nav-link" href="#" id="navbarDropdownNotificacao" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-bell-fill"></i>
+        @if (Model.Any())
+        {
+            <span class="position-absolute top-1 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6em;">
+                @Model.Count()
+            </span>
+        }
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownNotificacao">
+        @if (Model.Any())
+        {
+            foreach (var notificacao in Model)
+            {
+                <li>
+                    <a class="dropdown-item" href="@notificacao.Url" style="white-space: normal; width: 300px;">
+                        <div class="small">@notificacao.DataCriacao.ToString("dd/MM/yyyy HH:mm")</div>
+                        @notificacao.Mensagem
+                    </a>
+                </li>
+            }
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-center" href="#">Ver todas as notificações</a></li>
+        }
+        else
+        {
+            <li><a class="dropdown-item" href="#">Nenhuma notificação nova</a></li>
+        }
+    </ul>
+</li>
