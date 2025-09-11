@@ -8,6 +8,7 @@
         var role = User.FindFirst(ClaimTypes.Role)?.Value;
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
+        @await Component.InvokeAsync("Notificacao")
         if(userType == "Cliente")
         {
             <li class="nav-item">

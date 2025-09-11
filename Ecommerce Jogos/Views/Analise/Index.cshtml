@@ -1,6 +1,9 @@
-﻿@{
+﻿@model Ecommerce_Jogos.Models.AnaliseVendasViewModel
+@{
     ViewData["Title"] = "Análise de Vendas";
 }
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <h1>@ViewData["Title"]</h1>
 <p>Utilize os filtros abaixo para gerar análises e comparar o desempenho de vendas.</p>
@@ -11,14 +14,14 @@
         <i class="bi bi-filter"></i> Filtro da Análise
     </div>
     <div class="card-body">
-        <form action="#" method="get">
+        <form id="form-analise">
             <div class="row align-items-end">
                 <div class="col-md-3">
-                    <label class="form-label">Período:</label>
+                    <label for="dataInicio" class="form-label">Período:</label>
                     <div class="input-group">
-                        <input type="date" class="form-control" name="dataInicio" value="2025-07-01">
+                        <input type="date" id="dataInicio" class="form-control" name="dataInicio" value="@DateTime.Now.AddMonths(-1).ToString("yyyy-MM-dd")">
                         <span class="input-group-text">até</span>
-                        <input type="date" class="form-control" name="dataFim" value="2025-07-31">
+                        <input type="date" id="dataFim" class="form-control" name="dataFim" value="@DateTime.Now.ToString("yyyy-MM-dd")">
                     </div>
                 </div>
                 <div class="col-md-3">
@@ -33,16 +36,15 @@
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <label for="itens" class="form-label">Itens a Comparar:</label>
-                    <select id="itens" name="itens" class="form-select" multiple size="3">
-                        <option value="1" selected>God of War Ragnarök (PS5)</option>
-                        <option value="2" selected>The Legend of Zelda (Switch)</option>
-                        <option value="3">Starfield (Xbox)</option>
-                        <option value="4">Elden Ring (PS5)</option>
-                    </select>
+                    <label for="ids" class="form-label">Itens a Comparar:</label>
+                    <select id="ids" name="ids" class="form-select" multiple size="4"></select>
+                    <small class="form-text text-muted">Segure Ctrl para selecionar mais de um item.</small>
                 </div>
                 <div class="col-md-2 text-end">
-                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span id="filtro-spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        Filtrar
+                    </button>
                 </div>
             </div>
         </form>
@@ -51,46 +53,166 @@
 
 <div class="card">
     <div class="card-header">
-        <i class="bi bi-graph-up"></i> Histórico de Vendas (Julho/2025)
+        <i class="bi bi-graph-up"></i> Histórico de Vendas
     </div>
     <div class="card-body">
-        <img src="/img/grafico-linhas.png" class="img-fluid" alt="Gráfico de linhas de vendas">
+        <canvas id="graficoVendas"></canvas>
     </div>
-    <div class="card-footer text-muted">
-        Comparando vendas de: God of War Ragnarök, The Legend of Zelda: Tears of the Kingdom
+    <div id="card-footer-info" class="card-footer text-muted" style="display: none;">
+        Comparando vendas de: <span id="info-comparacao"></span>
     </div>
 </div>
 
-<div class="mt-4">
+<div class="mt-4" id="tabela-detalhes-container" style="display: none;">
     <h4>Dados Detalhados</h4>
     <table class="table table-sm table-bordered">
-        <thead class="table-light">
-            <tr>
-                <th>Data</th>
-                <th class="text-end">Vendas (God of War)</th>
-                <th class="text-end">Vendas (Zelda)</th>
-                <th class="text-end">Total</th>
-            </tr>
+        <thead id="tabela-detalhes-header" class="table-light">
         </thead>
-        <tbody>
-            <tr>
-                <td>01/07/2025</td>
-                <td class="text-end">5</td>
-                <td class="text-end">8</td>
-                <td class="text-end">13</td>
-            </tr>
-            <tr>
-                <td>02/07/2025</td>
-                <td class="text-end">7</td>
-                <td class="text-end">6</td>
-                <td class="text-end">13</td>
-            </tr>
-            <tr>
-                <td>03/07/2025</td>
-                <td class="text-end">4</td>
-                <td class="text-end">9</td>
-                <td class="text-end">13</td>
-            </tr>
+        <tbody id="tabela-detalhes-body">
         </tbody>
     </table>
 </div>
+
+
+@section Scripts {
+    <script>
+        // Armazena as listas de produtos e categorias vindas do ViewModel
+        const produtos = @Html.Raw(Json.Serialize(Model.Produtos));
+        const categorias = @Html.Raw(Json.Serialize(Model.Categorias));
+        let graficoVendasChart;
+
+        // Função para popular o dropdown de itens
+        function popularItens(tipo) {
+            const select = $('#ids');
+            select.empty(); // Limpa as opções atuais
+            const lista = (tipo === 'produto') ? produtos : categorias;
+            lista.forEach(item => {
+                select.append(new Option(item.text, item.value));
+            });
+        }
+
+        // Função para atualizar a tabela de dados detalhados
+        function atualizarTabela(labels, datasets) {
+            const thead = $('#tabela-detalhes-header');
+            const tbody = $('#tabela-detalhes-body');
+            thead.empty();
+            tbody.empty();
+
+            // Cria o cabeçalho da tabela
+            let headerRow = '<tr><th>Data</th>';
+            datasets.forEach(ds => {
+                headerRow += `<th class="text-end">${ds.label}</th>`;
+            });
+            headerRow += '<th class="text-end">Total</th></tr>';
+            thead.append(headerRow);
+
+            // Preenche as linhas da tabela
+            labels.forEach((label, index) => {
+                let bodyRow = `<tr><td>${label}</td>`;
+                let totalLinha = 0;
+                datasets.forEach(ds => {
+                    const valor = ds.data[index] || 0;
+                    totalLinha += valor;
+                    bodyRow += `<td class="text-end">${valor}</td>`;
+                });
+                bodyRow += `<td class="text-end"><strong>${totalLinha}</strong></td></tr>`;
+                tbody.append(bodyRow);
+            });
+
+            $('#tabela-detalhes-container').slideDown();
+        }
+
+
+        $(document).ready(function () {
+            // Popula a lista de itens inicialmente com os produtos
+            popularItens('produto');
+
+            // Event listener para trocar a lista ao selecionar Categoria/Produto
+            $('input[name="tipoComparacao"]').change(function () {
+                popularItens(this.value);
+            });
+
+            // Event listener para o envio do formulário
+            $('#form-analise').submit(function (e) {
+                e.preventDefault(); // Previne o recarregamento da página
+
+                const btn = $(this).find('button[type="submit"]');
+                const spinner = $('#filtro-spinner');
+
+                btn.prop('disabled', true);
+                spinner.removeClass('d-none');
+
+                // Coleta os dados do formulário
+                const formData = {
+                    dataInicio: $('#dataInicio').val(),
+                    dataFim: $('#dataFim').val(),
+                    tipoComparacao: $('input[name="tipoComparacao"]:checked').val(),
+                    ids: $('#ids').val()
+                };
+
+                // Chamada AJAX para o Controller
+                $.ajax({
+                    url: '@Url.Action("ObterDadosAnalise", "Analise")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(formData),
+                    success: function (response) {
+                        const { labels, datasets } = response;
+
+                        // Atualiza o rodapé do card com os itens sendo comparados
+                        const nomesItens = datasets.map(d => d.label).join(', ');
+                        $('#info-comparacao').text(nomesItens);
+                        $('#card-footer-info').show();
+
+                        // Atualiza a tabela de dados
+                        atualizarTabela(labels, datasets);
+
+                        // Destrói o gráfico anterior, se existir
+                        if (graficoVendasChart) {
+                            graficoVendasChart.destroy();
+                        }
+
+                        // Cria o novo gráfico
+                        const ctx = document.getElementById('graficoVendas').getContext('2d');
+                        graficoVendasChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: labels,
+                                datasets: datasets
+                            },
+                            options: {
+                                responsive: true,
+                                scales: {
+                                    x: { // Configuração do eixo X (horizontal)
+                                        title: {
+                                            display: true,
+                                            text: 'Data'
+                                        }
+                                    },
+                                    y: { // Configuração do eixo Y (vertical)
+                                        beginAtZero: true,
+                                        title: {
+                                            display: true,
+                                            text: 'Quantidade Vendida'
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    },
+                    error: function (xhr) {
+                        let errorMsg = 'Ocorreu um erro ao buscar os dados.';
+                        if (xhr.status === 400 && xhr.responseText) {
+                            errorMsg = 'Erro nos dados enviados: ' + xhr.responseText;
+                        }
+                        alert(errorMsg);
+                    },
+                    complete: function() {
+                        btn.prop('disabled', false);
+                        spinner.addClass('d-none');
+                    }
+                });
+            });
+        });
+    </script>
+}

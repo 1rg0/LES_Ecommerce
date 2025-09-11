@@ -6,6 +6,21 @@
 <div class="container mt-4">
     <h1 class="mb-4">@ViewData["Title"]</h1>
 
+    @if (TempData["CarrinhoNotificacoes"] != null)
+    {
+        <div class="alert alert-warning" role="alert">
+            <h4 class="alert-heading">Atenção!</h4>
+            <p>Alguns itens no seu carrinho foram atualizados devido à mudança em nosso estoque:</p>
+            <hr>
+            <ul>
+                @foreach (var msg in (List<string>)TempData["CarrinhoNotificacoes"])
+                {
+                    <li>@msg</li>
+                }
+            </ul>
+        </div>
+    }
+
     <div class="row">
         <div class="col-md-8">
             <h4>Itens no seu carrinho (<span id="item-count">@Model.Itens.Count</span>)</h4>

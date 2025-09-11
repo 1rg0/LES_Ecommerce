@@ -44,6 +44,8 @@ namespace Ecommerce_Jogos.Data
 
         public DbSet<PagamentoPedido> PagamentosPedido { get; set; }
 
+        public DbSet<Notificacao> Notificacoes { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -85,6 +87,8 @@ namespace Ecommerce_Jogos.Data
             modelBuilder.Entity<Troca>().ToTable("Troca");
 
             modelBuilder.Entity<PagamentoPedido>().ToTable("PagamentoPedido");
+
+            modelBuilder.Entity<Notificacao>().ToTable("Notificacao");
 
             modelBuilder.Entity<ItemPedido>()
                 .HasKey(ip => new { ip.PedidoID, ip.ProdutoID });

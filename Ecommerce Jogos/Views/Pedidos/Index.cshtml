@@ -88,7 +88,7 @@
                 <td class="text-center">
                     <a asp-controller="Pedidos" asp-action="Details" asp-route-id="@pedido.ID" class="btn btn-sm btn-info">Detalhes</a>
 
-                    @if (pedido.Status == "EM PROCESSAMENTO")
+                    @if (pedido.Status == "APROVADA")
                     {
                         <button type="button" class="btn btn-sm btn-primary btn-despachar"
                                 data-bs-toggle="modal"

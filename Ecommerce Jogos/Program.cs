@@ -40,6 +40,8 @@ namespace Ecommerce_Jogos
 
             builder.Services.AddScoped<LogService>();
 
+            builder.Services.AddHttpContextAccessor();
+
             builder.Services.AddSession(options =>
             {
                 options.IdleTimeout = TimeSpan.FromMinutes(30);
