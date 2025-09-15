@@ -1932,11 +1932,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\Ecommerce_Jogos.Tests\\Ecommerce_Jogos.Tests.csproj",
+      "projectUniqueName": "D:\\FATEC\\LES\\Projeto\\LES_Ecommerce\\Ecommerce_Jogos.Tests\\Ecommerce_Jogos.Tests.csproj",
       "projectName": "Ecommerce_Jogos.Tests",
-      "projectPath": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\Ecommerce_Jogos.Tests\\Ecommerce_Jogos.Tests.csproj",
+      "projectPath": "D:\\FATEC\\LES\\Projeto\\LES_Ecommerce\\Ecommerce_Jogos.Tests\\Ecommerce_Jogos.Tests.csproj",
       "packagesPath": "C:\\Users\\igorf\\.nuget\\packages\\",
-      "outputPath": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\Ecommerce_Jogos.Tests\\obj\\",
+      "outputPath": "D:\\FATEC\\LES\\Projeto\\LES_Ecommerce\\Ecommerce_Jogos.Tests\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
