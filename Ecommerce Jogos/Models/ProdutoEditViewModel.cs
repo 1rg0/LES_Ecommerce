@@ -71,5 +71,8 @@ namespace Ecommerce_Jogos.Models
         [Required(ErrorMessage = "O preço de venda é obrigatório.")]
         [Display(Name = "Preço de Venda")]
         public string PrecoVenda { get; set; }
+
+        public bool UsuarioIsGerente { get; set; }
+        public decimal MargemLucro { get; set; }
     }
 }

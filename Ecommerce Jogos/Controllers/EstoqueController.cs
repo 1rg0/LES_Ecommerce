@@ -68,6 +68,11 @@ namespace Ecommerce_Jogos.Controllers
                     DataEntrada = viewModel.DataEntrada
                 };
                 _context.Add(novaEntrada);
+                await _context.SaveChangesAsync();
+
+                var maiorCusto = await _context.EntradasEstoque
+                               .Where(e => e.ProdutoID == viewModel.ProdutoID)
+                               .MaxAsync(e => e.ValorCusto);
 
                 var produtoParaAtualizar = await _context.Produtos
                     .Include(p => p.GrupoPrecificacao)
@@ -75,13 +80,11 @@ namespace Ecommerce_Jogos.Controllers
 
                 if (produtoParaAtualizar != null && produtoParaAtualizar.GrupoPrecificacao != null)
                 {
-                    produtoParaAtualizar.PrecoCusto = viewModel.ValorCusto;
+                    produtoParaAtualizar.PrecoCusto = maiorCusto;
 
                     var margem = produtoParaAtualizar.GrupoPrecificacao.MargemLucro;
-                    produtoParaAtualizar.PrecoVenda = viewModel.ValorCusto * (1 + (margem / 100));
+                    produtoParaAtualizar.PrecoVenda = maiorCusto * (1 + (margem / 100));
                 }
-
-                await _context.SaveChangesAsync();
 
                 await VerificarEstoque(viewModel.ProdutoID);
 

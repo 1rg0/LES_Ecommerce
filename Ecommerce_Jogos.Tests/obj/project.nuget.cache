@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Odjvuwq1+tQ=",
+  "dgSpecHash": "lwI+LoH+mz4=",
   "success": true,
-  "projectFilePath": "D:\\FATEC\\LES\\Projeto\\LES_Ecommerce\\Ecommerce_Jogos.Tests\\Ecommerce_Jogos.Tests.csproj",
+  "projectFilePath": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\Ecommerce_Jogos.Tests\\Ecommerce_Jogos.Tests.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\igorf\\.nuget\\packages\\coverlet.collector\\6.0.4\\coverlet.collector.6.0.4.nupkg.sha512",
     "C:\\Users\\igorf\\.nuget\\packages\\dotnetseleniumextras.waithelpers\\3.11.0\\dotnetseleniumextras.waithelpers.3.11.0.nupkg.sha512",
