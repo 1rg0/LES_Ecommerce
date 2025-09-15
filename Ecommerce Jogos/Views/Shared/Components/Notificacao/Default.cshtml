@@ -16,7 +16,7 @@
             foreach (var notificacao in Model)
             {
                 <li>
-                    <a class="dropdown-item" href="@notificacao.Url" style="white-space: normal; width: 300px;">
+                    <a class="dropdown-item notificacao-link" href="@notificacao.Url" data-id="@notificacao.Id" style="white-space: normal; width: 300px;">
                         <div class="small">@notificacao.DataCriacao.ToString("dd/MM/yyyy HH:mm")</div>
                         @notificacao.Mensagem
                     </a>

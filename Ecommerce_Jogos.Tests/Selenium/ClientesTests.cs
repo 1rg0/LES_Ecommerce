@@ -19,7 +19,10 @@ namespace Ecommerce_Jogos.Tests.Selenium
         [SetUp]
         public void Setup()
         {
-            _driver = new ChromeDriver();
+            var options = new ChromeOptions();
+            options.AddArgument("--incognito");
+
+            _driver = new ChromeDriver(options);
             _driver.Manage().Window.Maximize();
             _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
         }
@@ -53,6 +56,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
             string nomeOriginal = $"Cliente Para Editar {Guid.NewGuid().ToString().Substring(0, 4)}";
             string cpfOriginal = GerarCpfValido();
             string emailOriginal = $"e{cpfOriginal}@teste.com";
+            string cpfFormatado = Convert.ToUInt64(cpfOriginal).ToString(@"000\.000\.000\-00");
 
             Login();
 
@@ -60,7 +64,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
 
             _wait.Until(ExpectedConditions.ElementIsVisible(By.ClassName("table")));
 
-            var linhaDoCliente = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//tr[td[normalize-space(.)='{cpfOriginal}']]")));
+            var linhaDoCliente = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//tr[td[normalize-space(.)='{nomeOriginal}']]")));
 
             var botaoEditar = linhaDoCliente.FindElement(By.LinkText("Editar"));
             botaoEditar.Click();
@@ -72,7 +76,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
             Thread.Sleep(500);
 
             var campoTelefone = _wait.Until(ExpectedConditions.ElementToBeClickable(By.Id("NumeroTelefone")));
-            string novoTelefone = "999998888";
+            string novoTelefone = "99999-8888";
 
             campoTelefone.Clear();
             campoTelefone.SendKeys(novoTelefone);
@@ -100,14 +104,14 @@ namespace Ecommerce_Jogos.Tests.Selenium
 
             _wait.Until(ExpectedConditions.ElementIsVisible(By.ClassName("table")));
 
-            var linhaDoCliente = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//tr[td[contains(text(), '{cpf}')]]")));
+            var linhaDoCliente = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//tr[td[contains(text(), '{nome}')]]")));
 
             var botaoInativar = linhaDoCliente.FindElement(By.XPath(".//button[text()='Inativar']"));
             botaoInativar.Click();
 
             _wait.Until(ExpectedConditions.ElementIsVisible(By.ClassName("table")));
 
-            var linhaDoClienteAtualizada = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//tr[td[contains(text(), '{cpf}')]]")));
+            var linhaDoClienteAtualizada = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//tr[td[contains(text(), '{nome}')]]")));
 
             var celulaStatus = linhaDoClienteAtualizada.FindElement(By.XPath("./td[5]"));
 
@@ -126,12 +130,12 @@ namespace Ecommerce_Jogos.Tests.Selenium
 
             _wait.Until(ExpectedConditions.ElementIsVisible(By.ClassName("table")));
 
-            var linhaDoClienteOriginal = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//tr[td[contains(text(), '{cpf}')]]")));
+            var linhaDoClienteOriginal = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//tr[td[contains(text(), '{nome}')]]")));
             linhaDoClienteOriginal.FindElement(By.XPath(".//button[text()='Inativar']")).Click();
 
             _wait.Until(ExpectedConditions.ElementIsVisible(By.ClassName("table")));
 
-            var linhaDoClienteInativo = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//tr[td[contains(text(), '{cpf}')]]")));
+            var linhaDoClienteInativo = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//tr[td[contains(text(), '{nome}')]]")));
 
             Assert.That(linhaDoClienteInativo.FindElement(By.XPath("./td[5]")).Text, Is.EqualTo("Inativo"));
 
@@ -141,7 +145,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
 
             _wait.Until(ExpectedConditions.ElementIsVisible(By.ClassName("table")));
 
-            var linhaDoClienteFinal = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//tr[td[contains(text(), '{cpf}')]]")));
+            var linhaDoClienteFinal = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//tr[td[contains(text(), '{nome}')]]")));
 
             var celulaStatusFinal = linhaDoClienteFinal.FindElement(By.XPath("./td[5]"));
             Assert.That(celulaStatusFinal.Text, Is.EqualTo("Ativo"), "O status do cliente não foi alterado para 'Ativo'.");
@@ -162,7 +166,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
 
             _wait.Until(ExpectedConditions.ElementIsVisible(By.ClassName("table")));
 
-            var linhaDoCliente = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//tr[td[contains(text(), '{cpf}')]]")));
+            var linhaDoCliente = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//tr[td[contains(text(), '{nome}')]]")));
             linhaDoCliente.FindElement(By.LinkText("Detalhes")).Click();
             _wait.Until(ExpectedConditions.ElementIsVisible(By.TagName("h1")));
 
@@ -191,16 +195,6 @@ namespace Ecommerce_Jogos.Tests.Selenium
             var cardEditado = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//div[contains(@class, 'card') and contains(normalize-space(.), 'CEP: {cepParaEditar}')]")));
             Assert.That(cardEditado.Text, Does.Contain(novoApelido), "O apelido do endereço não foi atualizado corretamente.");
 
-            var cardParaExcluir = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//div[contains(@class, 'card') and contains(normalize-space(.), 'CEP: {cepParaExcluir}')]")));
-            cardParaExcluir.FindElement(By.CssSelector("button.btn-danger")).Click();
-
-            var modal = _wait.Until(ExpectedConditions.ElementIsVisible(By.Id("confirmDeleteModal")));
-            modal.FindElement(By.XPath(".//button[text()='Excluir']")).Click();
-
-            _wait.Until(ExpectedConditions.StalenessOf(cardParaExcluir));
-            var cardsExcluidos = _driver.FindElements(By.XPath($"//div[contains(@class, 'card') and contains(normalize-space(.), 'CEP: {cepParaExcluir}')]"));
-            Assert.That(cardsExcluidos.Count, Is.EqualTo(0), "O endereço não foi excluído da lista.");
-
             _driver.FindElement(By.LinkText("Adicionar Novo Endereço")).Click();
 
             _wait.Until(ExpectedConditions.UrlContains("/Enderecos/Create"));
@@ -225,6 +219,23 @@ namespace Ecommerce_Jogos.Tests.Selenium
             _wait.Until(ExpectedConditions.UrlContains("/Clientes/Details"));
             var corpoDaPagina = _driver.FindElement(By.TagName("body")).Text;
             Assert.That(corpoDaPagina, Does.Contain(apelidoNovo), "O novo endereço não foi encontrado na página de detalhes do cliente.");
+
+            _wait.Until(ExpectedConditions.ElementIsVisible(By.TagName("h1")));
+            linkGerenciarEnderecos = _driver.FindElement(By.LinkText("Gerenciar Endereços"));
+            js = (IJavaScriptExecutor)_driver;
+            js.ExecuteScript("arguments[0].scrollIntoView({block: 'center'});", linkGerenciarEnderecos);
+            Thread.Sleep(500);
+            linkGerenciarEnderecos.Click();
+
+            var cardParaExcluir = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//div[contains(@class, 'card') and contains(normalize-space(.), 'CEP: {cepParaExcluir}')]")));
+            cardParaExcluir.FindElement(By.CssSelector("button.btn-danger")).Click();
+
+            var modal = _wait.Until(ExpectedConditions.ElementIsVisible(By.Id("confirmDeleteModal")));
+            modal.FindElement(By.XPath(".//button[text()='Excluir']")).Click();
+
+            _wait.Until(ExpectedConditions.StalenessOf(cardParaExcluir));
+            var cardsExcluidos = _driver.FindElements(By.XPath($"//div[contains(@class, 'card') and contains(normalize-space(.), 'CEP: {cepParaExcluir}')]"));
+            Assert.That(cardsExcluidos.Count, Is.EqualTo(0), "O endereço não foi excluído da lista.");
         }
 
         [Test]
@@ -240,7 +251,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
 
             _wait.Until(ExpectedConditions.ElementIsVisible(By.ClassName("table")));
 
-            var linhaDoCliente = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//tr[td[contains(text(), '{cpf}')]]")));
+            var linhaDoCliente = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//tr[td[contains(text(), '{nome}')]]")));
             linhaDoCliente.FindElement(By.LinkText("Detalhes")).Click();
             _wait.Until(ExpectedConditions.ElementIsVisible(By.TagName("h1")));
 
@@ -260,13 +271,16 @@ namespace Ecommerce_Jogos.Tests.Selenium
             var cardsExcluidos = _driver.FindElements(By.XPath($"//div[contains(@class, 'card') and contains(normalize-space(.), 'Número: **** **** **** {finalCartaoParaExcluir}')]"));
             Assert.That(cardsExcluidos.Count, Is.EqualTo(0), "O cartão não foi excluído da lista.");
 
+            _wait.Until(ExpectedConditions.UrlContains("/Cartoes"));
+
             _driver.FindElement(By.LinkText("Adicionar Novo Cartão")).Click();
 
             _wait.Until(ExpectedConditions.UrlContains("/Cartoes/Create"));
             string finalCartaoNovo = "5555";
+            _driver.FindElement(By.Id("NumeroCartao")).SendKeys($"1111 2222 3333 {finalCartaoNovo}");
             _driver.FindElement(By.Id("NomeImpresso")).SendKeys("Novo Cartao Teste");
+            _driver.FindElement(By.Id("DataValidade")).SendKeys("11/2025");
             new SelectElement(_driver.FindElement(By.Id("Bandeira"))).SelectByValue("Mastercard");
-            _driver.FindElement(By.Id("NumeroCartao")).SendKeys($"111122223333{finalCartaoNovo}");
             _driver.FindElement(By.Id("CodigoSeguranca")).SendKeys("987");
             _driver.FindElement(By.Id("Preferencial")).Click();
 
@@ -299,7 +313,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
             new SelectElement(_driver.FindElement(By.Id("Genero"))).SelectByValue("Outro");
             new SelectElement(_driver.FindElement(By.Id("Tipo_TelefoneID"))).SelectByIndex(1);
             _driver.FindElement(By.Id("DDD")).SendKeys("11");
-            _driver.FindElement(By.Id("Numero")).SendKeys("987654321");
+            _driver.FindElement(By.Id("Numero")).SendKeys("98765-4321");
             _driver.FindElement(By.Id("Email")).SendKeys(email);
             _driver.FindElement(By.Id("Senha")).SendKeys("SenhaForte123!");
             _driver.FindElement(By.Id("ConfirmarSenha")).SendKeys("SenhaForte123!");
@@ -307,7 +321,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
             AdicionarEndereco("Endereço Para Editar", "08777-123", "Cobrança", "123", "Bairro", "1", "2", "1", "1", "");
             AdicionarEndereco("Endereço Para Excluir", "08777-124", "Entrega", "456", "Bairro", "2", "1", "1", "1", "");
 
-            AdicionarCartao("1111222233334444", "Teste Cartao", "Visa", "123");
+            AdicionarCartao("1111 2222 3333 4444", "Teste Cartao", "Visa", "123");
 
             _driver.FindElement(By.CssSelector("input[type='submit'][value='Salvar Cliente']")).Click();
             _wait.Until(ExpectedConditions.UrlContains("/Clientes"));

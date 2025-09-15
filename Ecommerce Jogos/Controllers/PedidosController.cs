@@ -59,8 +59,32 @@ namespace Ecommerce_Jogos.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Processar(CheckoutViewModel viewModel)
+        public async Task<IActionResult> Processar(CheckoutInputModel input)
         {
+            if (!ModelState.IsValid)
+            {
+                var clienteIdParaRecarga = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                var carrinhoParaRecarga = SessionHelper.GetObjectFromJson<CarrinhoViewModel>(HttpContext.Session, "Carrinho");
+
+                var viewModelParaRecarga = new CheckoutViewModel
+                {
+                    Carrinho = carrinhoParaRecarga,
+                    Enderecos = await _context.Enderecos
+                        .Where(e => e.ClienteID == clienteIdParaRecarga)
+                        .Include(e => e.Cidade).ThenInclude(c => c.Estado)
+                        .Include(e => e.Tipo_Logradouro)
+                        .ToListAsync(),
+                    Cartoes = await _context.Cartoes
+                        .Where(c => c.ClienteID == clienteIdParaRecarga)
+                        .ToListAsync(),
+                    EnderecoSelecionadoId = input.EnderecoSelecionadoId,
+                    PagamentosComCartao = input.PagamentosComCartao,
+                    CuponsAplicados = input.CuponsAplicados
+                };
+
+                return View("~/Views/Checkout/Index.cshtml", viewModelParaRecarga);
+            }
+
             var carrinho = SessionHelper.GetObjectFromJson<CarrinhoViewModel>(HttpContext.Session, "Carrinho");
             var clienteId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
@@ -81,53 +105,53 @@ namespace Ecommerce_Jogos.Controllers
                 }
             }
 
-            decimal valorFrete = 0;
+            decimal frete = 0;
             var enderecoSelecionado = await _context.Enderecos
                 .Include(e => e.Cidade).ThenInclude(c => c.Estado)
-                .FirstOrDefaultAsync(e => e.ID == viewModel.EnderecoSelecionadoId);
+                .FirstOrDefaultAsync(e => e.ID == input.EnderecoSelecionadoId);
 
             if (enderecoSelecionado != null)
             {
                 var uf = enderecoSelecionado.Cidade.Estado.UF;
-                if (uf == "SP") { valorFrete = 10.50m; }
-                else if (new[] { "RJ", "MG", "ES" }.Contains(uf)) { valorFrete = 18.00m; }
-                else { valorFrete = 25.75m; }
-            }
-
-            decimal valorDescontoTotal = 0;
-            var cuponsUtilizados = new List<Cupom>();
-            var cupomCodigo = HttpContext.Session.GetString("CupomCodigo");
-            if (viewModel.CuponsAplicados != null && viewModel.CuponsAplicados.Any())
-            {
-                var cuponsDoBanco = await _context.Cupons
-                    .Where(c => viewModel.CuponsAplicados.Contains(c.Codigo) && c.Ativo)
-                    .ToListAsync();
-
-                foreach (var cupom in cuponsDoBanco.Where(c => c.Tipo == "TROCA"))
-                {
-                    valorDescontoTotal += cupom.Valor;
-                    cuponsUtilizados.Add(cupom);
-                }
-                var cupomPromocional = cuponsDoBanco.FirstOrDefault(c => c.Tipo == "PROMOCIONAL");
-                if (cupomPromocional != null)
-                {
-                    valorDescontoTotal += cupomPromocional.Valor;
-                    cuponsUtilizados.Add(cupomPromocional);
-                }
+                if (uf == "SP") { frete = 10.50m; }
+                else if (new[] { "RJ", "MG", "ES" }.Contains(uf)) { frete = 18.00m; }
+                else { frete = 25.75m; }
             }
 
             var subtotal = carrinho.Total;
-            if (valorDescontoTotal > subtotal) valorDescontoTotal = subtotal;
+            var valorTotalDoPedido = subtotal + frete;
+            decimal valorDescontoEfetivo = 0;
+            decimal valorDoTroco = 0;
+            var cuponsUtilizados = new List<Cupom>();
 
-            var valorTotalFinal = subtotal + valorFrete - valorDescontoTotal;
-
-            decimal totalPagoComCartoes = 0;
-            if (viewModel.PagamentosComCartao != null)
+            if (input.CuponsAplicados != null && input.CuponsAplicados.Any())
             {
-                totalPagoComCartoes = viewModel.PagamentosComCartao.Sum(p => p.Valor);
+                cuponsUtilizados = await _context.Cupons
+                    .Where(c => input.CuponsAplicados.Contains(c.Codigo) && c.Ativo)
+                    .ToListAsync();
+
+                decimal valorTotalDosCupons = cuponsUtilizados.Sum(c => c.Valor);
+
+                if (valorTotalDosCupons > valorTotalDoPedido)
+                {
+                    valorDescontoEfetivo = valorTotalDoPedido;
+                    valorDoTroco = valorTotalDosCupons - valorTotalDoPedido;
+                }
+                else
+                {
+                    valorDescontoEfetivo = valorTotalDosCupons;
+                }
             }
 
-            if (totalPagoComCartoes < valorTotalFinal)
+            var valorTotalFinal = valorTotalDoPedido - valorDescontoEfetivo;
+
+            decimal totalPagoComCartoes = 0;
+            if (input.PagamentosComCartao != null)
+            {
+                totalPagoComCartoes = input.PagamentosComCartao.Sum(p => p.Valor);
+            }
+
+            if (totalPagoComCartoes < (valorTotalFinal - 0.01m))
             {
                 TempData["ErrorMessage"] = "O valor pago nos cartões é insuficiente para cobrir o total do pedido.";
                 return RedirectToAction("Index", "Checkout");
@@ -136,7 +160,7 @@ namespace Ecommerce_Jogos.Controllers
             var novoPedido = new Pedido
             {
                 ClienteID = clienteId,
-                EnderecoID = viewModel.EnderecoSelecionadoId,
+                EnderecoID = input.EnderecoSelecionadoId,
                 DataPedido = DateTime.Now,
                 ValorTotal = valorTotalFinal,
                 Status = "EM PROCESSAMENTO"
@@ -174,9 +198,34 @@ namespace Ecommerce_Jogos.Controllers
 
             await _context.SaveChangesAsync();
 
-            if (viewModel.PagamentosComCartao != null)
+            if (valorDoTroco > 0)
             {
-                foreach (var pagamento in viewModel.PagamentosComCartao)
+                var novoCupomDeTroco = new Cupom
+                {
+                    Codigo = $"TROCO-{novoPedido.ID}-{DateTime.Now.Ticks}",
+                    Tipo = "TROCO",
+                    Valor = valorDoTroco,
+                    DataCriacao = DateTime.Now,
+                    Ativo = true,
+                    ClienteID = clienteId,
+                    PedidoOrigemID = novoPedido.ID
+                };
+                _context.Cupons.Add(novoCupomDeTroco);
+
+                var notificacaoTroco = new Notificacao
+                {
+                    ClienteID = clienteId,
+                    Mensagem = $"Um cupom de troco no valor de {valorDoTroco:C} foi gerado para você a partir do pedido #{novoPedido.ID}.",
+                    Url = Url.Action("Details", "Pedidos", new { id = novoPedido.ID }),
+                    DataCriacao = DateTime.Now,
+                    Lida = false
+                };
+                _context.Notificacoes.Add(notificacaoTroco);
+            }
+            
+            if (input.PagamentosComCartao != null)
+            {
+                foreach (var pagamento in input.PagamentosComCartao)
                 {
                     var pagamentoPedido = new PagamentoPedido
                     {
@@ -277,12 +326,9 @@ namespace Ecommerce_Jogos.Controllers
                 .Where(c => c.PedidoUsoID == id)
                 .ToListAsync();
 
-            if (pedido.Status == "TROCADO")
-            {
-                var cupomDeTroca = await _context.Cupons
-                                         .FirstOrDefaultAsync(c => c.PedidoOrigemID == id);
-                ViewBag.CupomDeTroca = cupomDeTroca;
-            }
+            var cupomGerado = await _context.Cupons
+                                .FirstOrDefaultAsync(c => c.PedidoOrigemID == id);
+            ViewBag.CupomGerado = cupomGerado;
 
             return View(pedido);
         }
@@ -306,6 +352,16 @@ namespace Ecommerce_Jogos.Controllers
             var dadosAntigos = new { Status = pedido.Status };
 
             pedido.Status = "EM TRÂNSITO";
+
+            var notificacaoDespacho = new Notificacao
+            {
+                ClienteID = pedido.ClienteID,
+                Mensagem = $"Seu pedido #{pedido.ID} foi despachado e está a caminho!",
+                Url = Url.Action("Details", "Pedidos", new { id = pedido.ID }),
+                DataCriacao = DateTime.Now,
+                Lida = false
+            };
+            _context.Notificacoes.Add(notificacaoDespacho);
 
             await _logService.RegistrarLog(
                 adminId: GetCurrentAdminId(),
@@ -341,8 +397,17 @@ namespace Ecommerce_Jogos.Controllers
 
             var dadosAntigos = new { Status = "EM TRANSITO" };
 
-
             pedido.Status = "ENTREGUE";
+
+            var notificacaoEntrega = new Notificacao
+            {
+                ClienteID = pedido.ClienteID,
+                Mensagem = $"Seu pedido #{pedido.ID} foi entregue! Agradecemos a sua preferência.",
+                Url = Url.Action("Details", "Pedidos", new { id = pedido.ID }),
+                DataCriacao = DateTime.Now,
+                Lida = false
+            };
+            _context.Notificacoes.Add(notificacaoEntrega);
 
             await _logService.RegistrarLog(
                 adminId: GetCurrentAdminId(),
@@ -477,6 +542,16 @@ namespace Ecommerce_Jogos.Controllers
             pedido.Status = "TROCADO";
             troca.StatusTroca = "FINALIZADA";
 
+            var notificacaoTroca = new Notificacao
+            {
+                ClienteID = pedido.ClienteID,
+                Mensagem = $"Recebemos os itens da troca do pedido #{pedido.ID}. Um cupom de R$ {valorTotalTroca} foi gerado para você.",
+                Url = Url.Action("Details", "Pedidos", new { id = pedido.ID }),
+                DataCriacao = DateTime.Now,
+                Lida = false
+            };
+            _context.Notificacoes.Add(notificacaoTroca);
+
             await _logService.RegistrarLog(
                 adminId: GetCurrentAdminId(), 
                 tipoOperacao: "ALTERAÇÃO", 
@@ -555,13 +630,12 @@ namespace Ecommerce_Jogos.Controllers
 
         private async Task SimularAprovacaoPagamento(int pedidoId)
         {
-            // Aguarda um tempo curto para simular a comunicação com a operadora
-            await Task.Delay(2000); // Espera 2 segundos
+            await Task.Delay(2000);
 
             var pedido = await _context.Pedidos.FindAsync(pedidoId);
             if (pedido == null || pedido.Status != "EM PROCESSAMENTO")
             {
-                return; // Sai se o pedido não for encontrado ou já tiver sido processado
+                return;
             }
 
             var pagamentos = await _context.PagamentosPedido
@@ -575,11 +649,10 @@ namespace Ecommerce_Jogos.Controllers
                 if (pagamento.Cartao != null)
                 {
                     var ultimosQuatro = pagamento.Cartao.UltimosQuatroDigitos;
-                    // RN0028 (Simulado) - Verifica se os 4 últimos dígitos são iguais
                     if (ultimosQuatro.All(c => c == ultimosQuatro[0]))
                     {
                         deveReprovar = true;
-                        break; // Encontrou um motivo para reprovar, pode parar a verificação
+                        break;
                     }
                 }
             }
@@ -588,8 +661,22 @@ namespace Ecommerce_Jogos.Controllers
             var novoStatus = deveReprovar ? "REPROVADA" : "APROVADA";
             pedido.Status = novoStatus;
 
+            var mensagemNotificacao = novoStatus == "APROVADA"
+                ? $"O pagamento do seu pedido #{pedido.ID} foi aprovado! Já estamos preparando para o envio."
+                : $"Houve um problema com o pagamento do seu pedido #{pedido.ID}. Por favor, verifique seus dados ou entre em contato.";
+
+            var notificacaoPagamento = new Notificacao
+            {
+                ClienteID = pedido.ClienteID,
+                Mensagem = mensagemNotificacao,
+                Url = Url.Action("Details", "Pedidos", new { id = pedido.ID }),
+                DataCriacao = DateTime.Now,
+                Lida = false
+            };
+            _context.Notificacoes.Add(notificacaoPagamento);
+
             await _logService.RegistrarLog(
-                adminId: null, // Processo automático
+                adminId: null,
                 tipoOperacao: "ALTERAÇÃO",
                 tabela: "Pedido",
                 registroId: pedido.ID,
@@ -598,7 +685,6 @@ namespace Ecommerce_Jogos.Controllers
                 motivo: "Resposta do operadora do cartão"
             );
 
-            // Se o pagamento foi reprovado, retorna os itens ao estoque
             if (deveReprovar)
             {
                 var itensDoPedido = await _context.ItensPedido.Where(ip => ip.PedidoID == pedidoId).ToListAsync();
@@ -607,13 +693,12 @@ namespace Ecommerce_Jogos.Controllers
                     var reentradaEstoque = new EntradaEstoque
                     {
                         ProdutoID = item.ProdutoID,
-                        Quantidade = item.Quantidade, // Quantidade positiva para reentrada
+                        Quantidade = item.Quantidade,
                         ValorCusto = 0,
                         DataEntrada = DateTime.Now,
                         FornecedorID = null
                     };
                     _context.EntradasEstoque.Add(reentradaEstoque);
-                    // RN0028 - Desbloqueia e mantém em estoque
                     await VerificarEstoque(item.ProdutoID);
                 }
             }

@@ -43,11 +43,13 @@ namespace Ecommerce_Jogos.Controllers
                     }
                 }
 
+                // Remove os itens marcados fora do loop para não dar erro na coleção
                 foreach (var item in itensParaRemover)
                 {
                     carrinho.Itens.Remove(item);
                 }
 
+                // Se houveram notificações, armazena em TempData e atualiza a sessão
                 if (mensagensNotificacao.Any())
                 {
                     TempData["CarrinhoNotificacoes"] = mensagensNotificacao;
