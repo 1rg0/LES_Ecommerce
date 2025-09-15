@@ -116,7 +116,6 @@ namespace Ecommerce_Jogos.Controllers
 
         public async Task<IActionResult> Details(int id)
         {
-            // 1. Busca o produto pelo ID, incluindo todas as tabelas relacionadas
             var produto = await _context.Produtos
                 .Include(p => p.Plataforma)
                 .Include(p => p.Categorias)
@@ -124,21 +123,17 @@ namespace Ecommerce_Jogos.Controllers
                 .Include(p => p.Publicadora)
                 .FirstOrDefaultAsync(p => p.ID == id);
 
-            // 2. Se o produto não for encontrado, retorna a página de erro padrão
             if (produto == null)
             {
                 return NotFound();
             }
 
-            // 3. Calcula a quantidade em estoque para este produto
             var quantidadeEmEstoque = await _context.EntradasEstoque
                                             .Where(e => e.ProdutoID == id)
                                             .SumAsync(e => e.Quantidade);
 
-            // 4. Envia a quantidade calculada para a View através do ViewBag
             ViewBag.QuantidadeEmEstoque = quantidadeEmEstoque;
 
-            // 5. Envia o objeto 'produto' para a View
             return View(produto);
         }
 
@@ -257,7 +252,9 @@ namespace Ecommerce_Jogos.Controllers
                 CodigoBarras = produto.CodigoBarras,
                 PrecoCusto = produto.PrecoCusto.ToString("F2"),
                 PrecoVenda = produto.PrecoVenda.ToString("F2"),
-                CategoriaIDs = produto.Categorias.Select(c => c.ID).ToList()
+                CategoriaIDs = produto.Categorias.Select(c => c.ID).ToList(),
+                UsuarioIsGerente = User.IsInRole("Gerente"),
+                MargemLucro = produto.GrupoPrecificacao?.MargemLucro ?? 0
             };
 
             ViewBag.Plataformas = new SelectList(_context.Plataformas.OrderBy(p => p.Nome), "ID", "Nome", viewModel.PlataformaID);
@@ -300,7 +297,10 @@ namespace Ecommerce_Jogos.Controllers
                     var precoMinimo = precoCusto * (1 + (grupoPrecificacao.MargemLucro / 100));
                     if (precoVenda < precoMinimo)
                     {
-                        ModelState.AddModelError("PrecoVenda", $"O preço de venda não respeita a margem de lucro de {grupoPrecificacao.MargemLucro}%. O valor mínimo deve ser {precoMinimo.ToString("C")}.");
+                        if (!User.IsInRole("Gerente"))
+                        {
+                            ModelState.AddModelError("PrecoVenda", $"O preço de venda não respeita a margem de lucro de {grupoPrecificacao.MargemLucro}%. O valor mínimo deve ser {precoMinimo.ToString("C")}.");
+                        }
                     }
                 }
             }
@@ -419,7 +419,6 @@ namespace Ecommerce_Jogos.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleStatus(int id, string motivo)
         {
-            // Busca o estado original do produto para o log (Dados Antigos)
             var dadosAntigos = await _context.Produtos
                 .Include(p => p.Categorias)
                 .AsNoTracking()
@@ -430,20 +429,16 @@ namespace Ecommerce_Jogos.Controllers
                 return NotFound();
             }
 
-            // Busca a entidade que será de fato alterada
             var produtoParaAtualizar = await _context.Produtos.FindAsync(id);
             if (produtoParaAtualizar == null)
             {
                 return NotFound();
             }
 
-            // Inverte o status do produto
             produtoParaAtualizar.Ativo = !produtoParaAtualizar.Ativo;
 
-            // Determina o tipo de operação para o log
             string tipoOperacao = produtoParaAtualizar.Ativo ? "ATIVAÇÃO" : "INATIVAÇÃO";
 
-            // Registra a operação no log, incluindo o motivo
             var adminId = GetCurrentAdminId();
             await _logService.RegistrarLog(
                 adminId: adminId,
@@ -455,7 +450,6 @@ namespace Ecommerce_Jogos.Controllers
                 motivo: motivo
             );
 
-            // Salva a alteração do produto e o novo registro de log
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = $"Produto '{produtoParaAtualizar.Nome}' foi alterado para '{(produtoParaAtualizar.Ativo ? "Ativo" : "Inativo")}' com sucesso!";
@@ -482,20 +476,17 @@ namespace Ecommerce_Jogos.Controllers
 
         private int? GetCurrentAdminId()
         {
-            // Verifica se o usuário está autenticado
             if (!User.Identity.IsAuthenticated)
             {
                 return null;
             }
 
-            // Procura pela claim "UserType" para garantir que é um administrador
             var userTypeClaim = User.FindFirst("UserType");
             if (userTypeClaim?.Value != "Administrador")
             {
                 return null;
             }
 
-            // Procura pela claim que armazena o ID e a converte para int
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int adminId))
             {

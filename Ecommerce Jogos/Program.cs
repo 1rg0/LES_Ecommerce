@@ -100,6 +100,19 @@ namespace Ecommerce_Jogos
                     context.Administradores.Add(admin);
                     context.SaveChanges();
                 }
+
+                if (!context.Administradores.Any(a => a.Email == "gerente@ecommerce.com"))
+                {
+                    var gerente = new Administrador
+                    {
+                        NomeCompleto = "Gerente Master",
+                        Email = "gerente@ecommerce.com",
+                        Funcao = "Gerente",
+                        SenhaHash = BCrypt.Net.BCrypt.HashPassword("Gerente12345@")
+                    };
+                    context.Administradores.Add(gerente);
+                    context.SaveChanges();
+                }
             }
         }
     }
