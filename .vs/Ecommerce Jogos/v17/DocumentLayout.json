@@ -1,9 +1,9 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\",
+  "WorkspaceRootPath": "D:\\FATEC\\LES\\Projeto\\LES_Ecommerce\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{9752D1F3-2385-9F86-1120-1997ACF17FCC}|Ecommerce_Jogos.Tests\\Ecommerce_Jogos.Tests.csproj|d:\\fatec\\lab de engenharia de software\\projeto\\les_ecommerce\\ecommerce_jogos.tests\\selenium\\clientestests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{9752D1F3-2385-9F86-1120-1997ACF17FCC}|Ecommerce_Jogos.Tests\\Ecommerce_Jogos.Tests.csproj|d:\\fatec\\les\\projeto\\les_ecommerce\\ecommerce_jogos.tests\\selenium\\clientestests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{9752D1F3-2385-9F86-1120-1997ACF17FCC}|Ecommerce_Jogos.Tests\\Ecommerce_Jogos.Tests.csproj|solutionrelative:ecommerce_jogos.tests\\selenium\\clientestests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -20,13 +20,13 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "ClientesTests.cs",
-              "DocumentMoniker": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\Ecommerce_Jogos.Tests\\Selenium\\ClientesTests.cs",
+              "DocumentMoniker": "D:\\FATEC\\LES\\Projeto\\LES_Ecommerce\\Ecommerce_Jogos.Tests\\Selenium\\ClientesTests.cs",
               "RelativeDocumentMoniker": "Ecommerce_Jogos.Tests\\Selenium\\ClientesTests.cs",
-              "ToolTip": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\Ecommerce_Jogos.Tests\\Selenium\\ClientesTests.cs",
+              "ToolTip": "D:\\FATEC\\LES\\Projeto\\LES_Ecommerce\\Ecommerce_Jogos.Tests\\Selenium\\ClientesTests.cs",
               "RelativeToolTip": "Ecommerce_Jogos.Tests\\Selenium\\ClientesTests.cs",
-              "ViewState": "AgIAAAEBAAAAAAAAAAAIwBsBAAA1AAAAAAAAAA==",
+              "ViewState": "AgIAAJ4AAAAAAAAAAAAUwKoAAABPAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-15T12:21:14.272Z",
+              "WhenOpened": "2025-09-15T13:56:49.987Z",
               "EditorCaption": ""
             }
           ]

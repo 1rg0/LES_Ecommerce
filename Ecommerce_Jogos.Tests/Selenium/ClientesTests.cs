@@ -176,6 +176,9 @@ namespace Ecommerce_Jogos.Tests.Selenium
             Thread.Sleep(500);
             linkGerenciarEnderecos.Click();
 
+            var linkParaEditar = _driver.FindElement(By.LinkText("Editar"));
+            js.ExecuteScript("arguments[0].scrollIntoView({block: 'center'});", linkParaEditar);
+            Thread.Sleep(200);
             var cardParaEditar = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//div[contains(@class, 'card') and contains(normalize-space(.), 'CEP: {cepParaEditar}')]")));
             cardParaEditar.FindElement(By.LinkText("Editar")).Click();
 
@@ -323,13 +326,13 @@ namespace Ecommerce_Jogos.Tests.Selenium
 
             AdicionarCartao("1111 2222 3333 4444", "Teste Cartao", "Visa", "123");
 
-            _driver.FindElement(By.CssSelector("input[type='submit'][value='Salvar Cliente']")).Click();
+            ScrollToAndClick(By.CssSelector("input[type='submit'][value='Salvar Cliente']"));
             _wait.Until(ExpectedConditions.UrlContains("/Clientes"));
         }
 
         private void AdicionarEndereco(string apelido, string cep, string logradouro, string numero, string bairro, string cidadeId, string tipoEnderecoId, string tipoResidenciaId, string tipoLogradouroId, string observacao)
         {
-            _driver.FindElement(By.CssSelector("button[data-bs-target='#enderecoModal']")).Click();
+            ScrollToAndClick(By.CssSelector("button[data-bs-target='#enderecoModal']"));
 
             _wait.Until(ExpectedConditions.ElementIsVisible(By.Id("enderecoModal")));
 
@@ -351,7 +354,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
 
         private void AdicionarCartao(string numeroCartao, string nomeImpresso, string bandeira, string cvv)
         {
-            _driver.FindElement(By.CssSelector("button[data-bs-target='#cartaoModal']")).Click();
+            ScrollToAndClick(By.CssSelector("button[data-bs-target='#cartaoModal']"));
 
             _wait.Until(ExpectedConditions.ElementIsVisible(By.Id("cartaoModal")));
 
@@ -394,6 +397,16 @@ namespace Ecommerce_Jogos.Tests.Selenium
             cpf[10] = (resto < 2) ? 0 : 11 - resto;
 
             return string.Join("", cpf);
+        }
+
+        private void ScrollToAndClick(By locator)
+        {
+            //var element = _wait.Until(ExpectedConditions.ElementToBeClickable(locator));
+            var element = _driver.FindElement(locator);
+            IJavaScriptExecutor js = (IJavaScriptExecutor)_driver;
+            js.ExecuteScript("arguments[0].scrollIntoView({block: 'center'});", element);
+            Thread.Sleep(200);
+            element.Click();
         }
 
         [TearDown]
