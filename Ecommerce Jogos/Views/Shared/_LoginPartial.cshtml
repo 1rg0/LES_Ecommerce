@@ -8,9 +8,9 @@
         var role = User.FindFirst(ClaimTypes.Role)?.Value;
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        @await Component.InvokeAsync("Notificacao")
         if(userType == "Cliente")
         {
+            @await Component.InvokeAsync("Notificacao")
             <li class="nav-item">
                 <a class="nav-link text-dark" asp-controller="Clientes" asp-action="Details" asp-route-id="@userId">
                     Bem vindo(a), @fullName!

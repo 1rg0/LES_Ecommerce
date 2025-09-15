@@ -1,55 +1,45 @@
 ﻿$(document).ready(function () {
 
-    // --- FUNÇÃO AUXILIAR SEGURA PARA CONVERTER MOEDA ---
-    // Converte um texto (ex: "R$ 1.234,56") para um número (ex: 1234.56)
     function parseCurrency(textValue) {
         if (!textValue || typeof textValue !== 'string') {
             return 0;
         }
-        // Remove 'R$', espaços, e os pontos de milhar. Depois, troca a vírgula por ponto.
         var cleanedValue = textValue.replace('R$', '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
         var number = parseFloat(cleanedValue);
 
-        // Se o resultado não for um número, retorna 0.
         return isNaN(number) ? 0 : number;
     }
 
     function atualizarHiddenInputsDeCupons() {
-        // Limpa o container para não duplicar inputs
+
         $('#hidden-cupons-container').empty();
 
         var index = 0;
-        // Para cada badge de cupom visível na tela...
         $('#cupons-aplicados-lista').find('.btn-remover-cupom').each(function () {
             var codigo = $(this).data('codigo');
-            // Cria um input hidden correspondente
             var hiddenInput = `<input type="hidden" name="CuponsAplicados[${index}]" value="${codigo}" />`;
-            // Adiciona o input ao container dentro do form
             $('#hidden-cupons-container').append(hiddenInput);
             index++;
         });
     }
 
-    // --- FUNÇÃO PRINCIPAL PARA ATUALIZAR O RESUMO (CORRIGIDA) ---
     function atualizarResumoPagamento() {
-        // 1. Lê os componentes base do preço.
+
         var subtotal = parseCurrency($('#subtotal-carrinho').text());
         var frete = parseCurrency($('#frete-valor').text());
         var descontoTotal = 0;
 
-        // 2. Recalcula o desconto total a partir dos cupons visíveis na tela.
+
         $('#cupons-aplicados-lista').find('.badge').each(function () {
-            var text = $(this).text(); // Ex: "CUPOM10 (R$ 10,00)"
+            var text = $(this).text();
             var valorMatch = text.match(/\(R\$\s*([\d,.]+)\)/);
             if (valorMatch && valorMatch[1]) {
                 descontoTotal += parseCurrency(valorMatch[1]);
             }
         });
 
-        // Atualiza a linha de desconto total
         $('#valor-desconto').text("-" + descontoTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
 
-        // 3. Recalcula o total a pagar do zero, garantindo que o valor está sempre correto.
         var totalAPagar = subtotal + frete - descontoTotal;
         $('#total-com-frete').find('strong').text(totalAPagar.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
 
@@ -78,11 +68,13 @@
         } else {
             $('#valor-restante-resumo').addClass('text-danger').removeClass('text-success');
         }
+
+        if (restante <= 0.01) {
+            $('#pagamento-error').slideUp();
+            $('#lista-cartoes-pagamento').closest('.card').removeClass('border-danger');
+        }
     }
 
-    // --- EVENT LISTENERS ---
-
-    // Lógica de cálculo de frete
     $('#address-selection').on('change', '.address-radio', function () {
         var enderecoId = $(this).val();
         $('#frete-valor').html('<span class="spinner-border spinner-border-sm"></span> Calculando...');
@@ -101,10 +93,8 @@
         });
     });
 
-    // Inicializa as máscaras
     $('.money-mask').mask('000.000.000.000.000,00', { reverse: true });
 
-    // Lógica de múltiplos cartões
     function reindexarNomesCartoes() {
         var index = 0;
         $('.cartao-checkbox').each(function () {
@@ -140,7 +130,6 @@
         atualizarResumoPagamento();
     });
 
-    // Lógica de múltiplos cupons
     $('#btn-aplicar-cupom').on('click', function () {
         var codigo = $('#cupom-input').val();
         var btn = $(this);
@@ -196,5 +185,41 @@
                 }
             }
         });
+    });
+
+    $('#checkout-form').submit(function (e) {
+        var enderecoSelecionado = $('input[name="EnderecoSelecionadoId"]:checked').val();
+        var errorDiv = $('#endereco-error');
+
+        if (!enderecoSelecionado) {
+            e.preventDefault();
+            errorDiv.slideDown();
+            $('.card-body#address-selection').closest('.card').addClass('border-danger');
+            return false;
+        } else {
+            errorDiv.slideUp();
+            $('.card-body#address-selection').closest('.card').removeClass('border-danger');
+        }
+
+        var valorRestante = parseCurrency($('#valor-restante-resumo').text());
+        var pagamentoErrorDiv = $('#pagamento-error');
+        var pagamentoCard = $('#lista-cartoes-pagamento').closest('.card');
+
+        if (valorRestante > 0.01) {
+            e.preventDefault();
+            pagamentoErrorDiv.slideDown();
+            pagamentoCard.addClass('border-danger');
+            return false;
+        } else {
+            pagamentoErrorDiv.slideUp();
+            pagamentoCard.removeClass('border-danger');
+        }
+    });
+
+    $('#address-selection').on('change', '.address-radio', function () {
+        if ($(this).is(':checked')) {
+            $('#endereco-error').slideUp();
+            $('.card-body#address-selection').closest('.card').removeClass('border-danger');
+        }
     });
 });

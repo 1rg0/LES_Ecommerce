@@ -3,7 +3,7 @@
     ViewData["Title"] = $"Detalhes do Pedido #{Model.ID}";
     var pagamentos = ViewBag.Pagamentos as List<PagamentoPedido>;
     var cuponsUtilizados = ViewBag.CuponsUtilizados as List<Cupom>;
-    var cupomDeTrocaGerado = ViewBag.CupomDeTroca as Cupom;
+    var cupomGerado = ViewBag.CupomGerado as Cupom;
 
     var subtotal = Model.ItensPedido.Sum(i => i.PrecoUnitario * i.Quantidade);
     decimal frete = 0;
@@ -24,21 +24,33 @@
         }
     }
 
-    // O desconto é derivado do que "sobra"
     var descontoTotal = subtotal + frete - Model.ValorTotal;
 }
 
 <div class="container mt-4">
 
-    @if (Model.Status == "TROCADO" && cupomDeTrocaGerado != null)
+    @if (cupomGerado != null)
     {
-        <div class="alert alert-info shadow-sm mb-4" role="alert">
-            <h4 class="alert-heading"><i class="bi bi-ticket-percent-fill"></i> Cupom de Troca Gerado!</h4>
-            <p>Esta troca gerou o seguinte cupom de desconto para o cliente, que pode ser usado em futuras compras.</p>
-            <hr>
-            <p class="mb-0"><strong>Código:</strong> <code class="fs-5">@cupomDeTrocaGerado.Codigo</code></p>
-            <p><strong>Valor:</strong> <strong class="fs-5">@cupomDeTrocaGerado.Valor.ToString("C")</strong></p>
-        </div>
+        if (cupomGerado.Tipo == "TROCA")
+        {
+            <div class="alert alert-info shadow-sm mb-4" role="alert">
+                <h4 class="alert-heading"><i class="bi bi-ticket-percent-fill"></i> Cupom de Troca Gerado!</h4>
+                <p>Esta troca gerou o seguinte cupom de desconto, que pode ser usado em futuras compras.</p>
+                <hr>
+                <p class="mb-0"><strong>Código:</strong> <code class="fs-5">@cupomGerado.Codigo</code></p>
+                <p><strong>Valor:</strong> <strong class="fs-5">@cupomGerado.Valor.ToString("C")</strong></p>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info shadow-sm mb-4" role="alert">
+                <h4 class="alert-heading"><i class="bi bi-ticket-percent-fill"></i> Cupom de Troco Gerado!</h4>
+                <p>Esta compra gerou o seguinte cupom de troco, que pode ser usado em futuras compras.</p>
+                <hr>
+                <p class="mb-0"><strong>Código:</strong> <code class="fs-5">@cupomGerado.Codigo</code></p>
+                <p><strong>Valor:</strong> <strong class="fs-5">@cupomGerado.Valor.ToString("C")</strong></p>
+            </div>
+        }
     }
 
     <div class="card shadow-sm">

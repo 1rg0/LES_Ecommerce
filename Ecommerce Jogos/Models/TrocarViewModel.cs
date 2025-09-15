@@ -6,7 +6,6 @@ namespace Ecommerce_Jogos.Models
     {
 
     }
-    // Arquivo: Models/TrocaViewModel.cs
     public class SolicitarTrocaViewModel
     {
         public int PedidoId { get; set; }
@@ -16,7 +15,6 @@ namespace Ecommerce_Jogos.Models
         [MinLength(10, ErrorMessage = "Por favor, detalhe um pouco mais o motivo da troca.")]
         public string Motivo { get; set; }
 
-        // Guarda os IDs dos itens que o cliente selecionou
         public List<string> ItensSelecionados { get; set; } = new List<string>();
     }
 
@@ -25,7 +23,6 @@ namespace Ecommerce_Jogos.Models
         public int ProdutoId { get; set; }
         public string NomeProduto { get; set; }
         public string UrlImagem { get; set; }
-        // Usamos uma string para a chave composta "PedidoId_ProdutoId"
         public string ItemPedidoChave { get; set; }
     }
 }
