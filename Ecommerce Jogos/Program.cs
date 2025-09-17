@@ -39,6 +39,8 @@ namespace Ecommerce_Jogos
             });
 
             builder.Services.AddScoped<LogService>();
+            builder.Services.AddScoped<RankingService>();
+            builder.Services.AddScoped<EstoqueService>();
 
             builder.Services.AddHttpContextAccessor();
 

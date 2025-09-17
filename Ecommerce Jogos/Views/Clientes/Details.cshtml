@@ -48,6 +48,7 @@
                         <p><strong>Nome Completo:</strong> @Model.NomeCompleto</p>
                         <p><strong>CPF:</strong> @Model.CPF</p>
                         <p><strong>E-mail:</strong> @Model.Email</p>
+                        <p><strong>Ranking:</strong> @(Model.Ranking.HasValue? Model.Ranking.Value : 0) pontos</p>
                     </div>
                     <div class="col-md-6">
                         <p><strong>Data de Nascimento:</strong> @Model.DataNascimento.ToString("dd/MM/yyyy")</p>

@@ -33,6 +33,7 @@ namespace Ecommerce_Jogos.Data
         public DbSet<ProdutoCategoria> ProdutoCategorias { get; set; }
 
         public DbSet<EntradaEstoque> EntradasEstoque {  get; set; }
+        public DbSet<EstoqueBloqueado> EstoquesBloqueados { get; set; }
         public DbSet<Fornecedor> Fornecedores { get; set; }
 
         public DbSet<LogTransacoes> LogTransacoes { get; set; }
@@ -78,6 +79,7 @@ namespace Ecommerce_Jogos.Data
             modelBuilder.Entity<GrupoPrecificacao>().ToTable("GrupoPrecificacao");
 
             modelBuilder.Entity<EntradaEstoque>().ToTable("EntradaEstoque");
+            modelBuilder.Entity<EstoqueBloqueado>().ToTable("EstoqueBloqueado");
             modelBuilder.Entity<Fornecedor>().ToTable("Fornecedor");
 
             modelBuilder.Entity<LogTransacoes>().ToTable("LogTransacoes");

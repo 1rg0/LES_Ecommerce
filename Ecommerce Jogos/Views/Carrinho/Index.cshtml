@@ -109,6 +109,26 @@
     </div>
 </div>
 
+<div class="modal fade" id="expiracaoModal" tabindex="-1" aria-labelledby="expiracaoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="expiracaoModalLabel">Atenção: Itens Removidos do Carrinho</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>O tempo de reserva para os seguintes itens em seu carrinho expirou e eles foram removidos para que outros clientes possam comprá-los:</p>
+                <ul id="lista-produtos-removidos">
+                </ul>
+                <p class="mt-3">A página será atualizada.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 
@@ -218,6 +238,40 @@
             $('#carrinho-itens').on('focus', '.qty-input', function() {
                 var qtyInput = $(this);
                 qtyInput.attr('data-old-qty', qtyInput.val());
+            });
+
+            const expiracaoModal = new bootstrap.Modal(document.getElementById('expiracaoModal'));
+            let verificadorIntervalo = null;
+
+            function verificarCarrinho() {
+                $.ajax({
+                    url: '/Carrinho/VerificarExpiracao',
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.expirado) {
+                            clearInterval(verificadorIntervalo);
+
+                            const listaUl = $('#lista-produtos-removidos');
+                            listaUl.empty();
+                            response.produtosRemovidos.forEach(function(nomeProduto) {
+                                listaUl.append(`<li><strong>${nomeProduto}</strong></li>`);
+                            });
+
+                            expiracaoModal.show();
+                        }
+                    },
+                    error: function() {
+                        clearInterval(verificadorIntervalo);
+                    }
+                });
+            }
+
+            if ($('#carrinho-itens .card').length > 0) {
+                verificadorIntervalo = setInterval(verificarCarrinho, 15000);
+            }
+
+            $('#expiracaoModal').on('hidden.bs.modal', function () {
+                window.location.reload();
             });
 
         });
