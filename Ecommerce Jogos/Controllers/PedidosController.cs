@@ -13,11 +13,15 @@ namespace Ecommerce_Jogos.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly LogService _logService;
+        private readonly RankingService _rankingService;
+        private readonly EstoqueService _estoqueService;
 
-        public PedidosController(ApplicationDbContext context, LogService logService)
+        public PedidosController(ApplicationDbContext context, LogService logService, RankingService rankingService, EstoqueService estoqueService)
         {
             _context = context;
             _logService = logService;
+            _rankingService = rankingService;
+            _estoqueService = estoqueService;
         }
 
         public async Task<IActionResult> Index(string filtroCliente, string filtroStatus, DateTime? dataInicio, DateTime? dataFim, int pageNumber = 1)
@@ -262,6 +266,10 @@ namespace Ecommerce_Jogos.Controllers
 
             await _context.SaveChangesAsync();
 
+            int? clienteIdFinal = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            string sessaoIdFinal = HttpContext.Session.Id;
+            await _estoqueService.LiberarBloqueios(clienteIdFinal, sessaoIdFinal);
+
             HttpContext.Session.Remove("Carrinho");
             HttpContext.Session.Remove("CupomCodigo");
 
@@ -420,6 +428,8 @@ namespace Ecommerce_Jogos.Controllers
             );
 
             await _context.SaveChangesAsync();
+
+            await _rankingService.AtualizarRankingCliente(pedido.ClienteID);
 
             TempData["SuccessMessage"] = $"Entrega do pedido #{id} confirmada com sucesso!";
             return RedirectToAction(nameof(Index));
