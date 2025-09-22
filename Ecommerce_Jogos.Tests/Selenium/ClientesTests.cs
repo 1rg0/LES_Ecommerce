@@ -28,7 +28,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
         }
 
         [Test]
-        public void DeveAcessarPaginaDeClientes()
+        public void AcessarComoAdmin()
         {
             Login();
 
@@ -37,7 +37,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
         }
 
         [Test]
-        public void DeveCadastrarClienteComEnderecoECartaoViaModais()
+        public void CadastrarCliente()
         {
             string nomeUnico = $"Cliente Cadastro {Guid.NewGuid().ToString().Substring(0, 4)}";
             string cpfUnico = GerarCpfValido();
@@ -51,7 +51,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
         }
 
         [Test]
-        public void DeveEditarDadosDoClienteComSucesso()
+        public void EditarCliente()
         {
             string nomeOriginal = $"Cliente Para Editar {Guid.NewGuid().ToString().Substring(0, 4)}";
             string cpfOriginal = GerarCpfValido();
@@ -92,7 +92,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
         }
 
         [Test]
-        public void DeveInativarClienteComSucesso()
+        public void InativarCliente()
         {
             string nome = $"Cliente Para Inativar {Guid.NewGuid().ToString().Substring(0, 4)}";
             string cpf = GerarCpfValido();
@@ -119,7 +119,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
         }
 
         [Test]
-        public void DeveAtivarUmClientePreviamenteInativado()
+        public void AtivarCliente()
         {
             string nome = $"Cliente Para Ativar {Guid.NewGuid().ToString().Substring(0, 4)}";
             string cpf = GerarCpfValido();
@@ -152,7 +152,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
         }
 
         [Test]
-        public void DeveGerenciarEnderecosCompletamente()
+        public void GerenciarEnderecos()
         {
             string nome = $"Cliente Enderecos {Guid.NewGuid().ToString().Substring(0, 4)}";
             string cpf = GerarCpfValido();
@@ -242,7 +242,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
         }
 
         [Test]
-        public void DeveGerenciarCartoesCompletamente()
+        public void GerenciarCartoes()
         {
             string nome = $"Cliente Cartoes {Guid.NewGuid().ToString().Substring(0, 4)}";
             string cpf = GerarCpfValido();
@@ -326,13 +326,13 @@ namespace Ecommerce_Jogos.Tests.Selenium
 
             AdicionarCartao("1111 2222 3333 4444", "Teste Cartao", "Visa", "123");
 
-            ScrollToAndClick(By.CssSelector("input[type='submit'][value='Salvar Cliente']"));
+            DescerPaginaClicar(By.CssSelector("input[type='submit'][value='Salvar Cliente']"));
             _wait.Until(ExpectedConditions.UrlContains("/Clientes"));
         }
 
         private void AdicionarEndereco(string apelido, string cep, string logradouro, string numero, string bairro, string cidadeId, string tipoEnderecoId, string tipoResidenciaId, string tipoLogradouroId, string observacao)
         {
-            ScrollToAndClick(By.CssSelector("button[data-bs-target='#enderecoModal']"));
+            DescerPaginaClicar(By.CssSelector("button[data-bs-target='#enderecoModal']"));
 
             _wait.Until(ExpectedConditions.ElementIsVisible(By.Id("enderecoModal")));
 
@@ -354,7 +354,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
 
         private void AdicionarCartao(string numeroCartao, string nomeImpresso, string bandeira, string cvv)
         {
-            ScrollToAndClick(By.CssSelector("button[data-bs-target='#cartaoModal']"));
+            DescerPaginaClicar(By.CssSelector("button[data-bs-target='#cartaoModal']"));
 
             _wait.Until(ExpectedConditions.ElementIsVisible(By.Id("cartaoModal")));
 
@@ -399,7 +399,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
             return string.Join("", cpf);
         }
 
-        private void ScrollToAndClick(By locator)
+        private void DescerPaginaClicar(By locator)
         {
             //var element = _wait.Until(ExpectedConditions.ElementToBeClickable(locator));
             var element = _driver.FindElement(locator);
