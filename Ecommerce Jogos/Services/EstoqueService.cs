@@ -33,6 +33,22 @@ namespace Ecommerce_Jogos.Services
             return totalEntradas - totalBloqueado;
         }
 
+        public async Task<int> GetEstoqueDisponivelParaSessao(int produtoId, int? clienteId, string sessaoId)
+        {
+            var estoqueGeralDisponivel = await GetEstoqueDisponivel(produtoId);
+
+            var bloqueioDoUsuario = await _context.EstoquesBloqueados
+                .FirstOrDefaultAsync(b => b.ProdutoID == produtoId &&
+                                       ((clienteId.HasValue && b.ClienteID == clienteId) || b.SessaoId == sessaoId));
+
+            if (bloqueioDoUsuario != null)
+            {
+                return estoqueGeralDisponivel + bloqueioDoUsuario.QuantidadeBloqueada;
+            }
+
+            return estoqueGeralDisponivel;
+        }
+
         public async Task<bool> CriarBloqueio(int produtoId, int quantidade, int? clienteId, string sessaoId)
         {
             var estoqueDisponivel = await GetEstoqueDisponivel(produtoId);

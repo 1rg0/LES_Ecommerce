@@ -31,9 +31,11 @@ namespace Ecommerce_Jogos.Controllers
                 var mensagensNotificacao = new List<string>();
                 var itensParaRemover = new List<CarrinhoItemViewModel>();
 
+                var (clienteId, sessaoId) = GetUserAndSessionIds();
+
                 foreach (var item in carrinho.Itens)
                 {
-                    var estoqueDisponivel = await _estoqueService.GetEstoqueDisponivel(item.ProdutoId);
+                    var estoqueDisponivel = await _estoqueService.GetEstoqueDisponivelParaSessao(item.ProdutoId, clienteId, sessaoId);
 
                     if (estoqueDisponivel == 0)
                     {
@@ -50,7 +52,6 @@ namespace Ecommerce_Jogos.Controllers
                 if (itensParaRemover.Any())
                 {
                     var idsParaRemover = itensParaRemover.Select(i => i.ProdutoId).ToList();
-                    var (clienteId, sessaoId) = GetUserAndSessionIds();
 
                     var bloqueiosParaRemover = await _context.EstoquesBloqueados
                         .Where(b => ((clienteId.HasValue && b.ClienteID == clienteId) || b.SessaoId == sessaoId) && idsParaRemover.Contains(b.ProdutoID))
@@ -167,8 +168,6 @@ namespace Ecommerce_Jogos.Controllers
                 return NotFound("Item não encontrado no carrinho.");
             }
 
-            // --- LÓGICA DE VALIDAÇÃO CORRIGIDA ---
-            // 1. Libera temporariamente o bloqueio do item que está sendo alterado para obter o estoque total real.
             var bloqueioExistente = await _context.EstoquesBloqueados
                 .FirstOrDefaultAsync(b => ((clienteId.HasValue && b.ClienteID == clienteId) || b.SessaoId == sessaoId) && b.ProdutoID == produtoId);
 
@@ -178,20 +177,17 @@ namespace Ecommerce_Jogos.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            // 2. Agora, verifica o estoque disponível REAL
             var estoqueDisponivel = await _estoqueService.GetEstoqueDisponivel(produtoId);
             if (novaQuantidade > estoqueDisponivel)
             {
-                // Se o estoque não for suficiente, recria o bloqueio com a quantidade antiga e retorna o erro.
                 if (bloqueioExistente != null)
                 {
-                    _context.EstoquesBloqueados.Add(bloqueioExistente); // Readiciona o bloqueio original
+                    _context.EstoquesBloqueados.Add(bloqueioExistente);
                     await _context.SaveChangesAsync();
                 }
                 return BadRequest($"Estoque insuficiente. Apenas {estoqueDisponivel} unidades disponíveis.");
             }
 
-            // 3. Se o estoque for suficiente, atualiza o item no carrinho e cria o novo bloqueio.
             itemParaAtualizar.Quantidade = novaQuantidade;
             await _estoqueService.CriarBloqueio(itemParaAtualizar.ProdutoId, itemParaAtualizar.Quantidade, clienteId, sessaoId);
 
