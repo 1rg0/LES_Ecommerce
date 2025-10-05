@@ -3,8 +3,12 @@
   "WorkspaceRootPath": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{9752D1F3-2385-9F86-1120-1997ACF17FCC}|Ecommerce_Jogos.Tests\\Ecommerce_Jogos.Tests.csproj|d:\\fatec\\lab de engenharia de software\\projeto\\les_ecommerce\\ecommerce_jogos.tests\\selenium\\clientestests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{9752D1F3-2385-9F86-1120-1997ACF17FCC}|Ecommerce_Jogos.Tests\\Ecommerce_Jogos.Tests.csproj|solutionrelative:ecommerce_jogos.tests\\selenium\\clientestests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{86E6193F-BA56-4045-8C14-6CBEFF7EFF95}|Ecommerce Jogos\\Ecommerce Jogos.csproj|d:\\fatec\\lab de engenharia de software\\projeto\\les_ecommerce\\ecommerce jogos\\controllers\\pedidoscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{86E6193F-BA56-4045-8C14-6CBEFF7EFF95}|Ecommerce Jogos\\Ecommerce Jogos.csproj|solutionrelative:ecommerce jogos\\controllers\\pedidoscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{86E6193F-BA56-4045-8C14-6CBEFF7EFF95}|Ecommerce Jogos\\Ecommerce Jogos.csproj|d:\\fatec\\lab de engenharia de software\\projeto\\les_ecommerce\\ecommerce jogos\\controllers\\carrinhocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{86E6193F-BA56-4045-8C14-6CBEFF7EFF95}|Ecommerce Jogos\\Ecommerce Jogos.csproj|solutionrelative:ecommerce jogos\\controllers\\carrinhocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -19,14 +23,27 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "ClientesTests.cs",
-              "DocumentMoniker": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\Ecommerce_Jogos.Tests\\Selenium\\ClientesTests.cs",
-              "RelativeDocumentMoniker": "Ecommerce_Jogos.Tests\\Selenium\\ClientesTests.cs",
-              "ToolTip": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\Ecommerce_Jogos.Tests\\Selenium\\ClientesTests.cs",
-              "RelativeToolTip": "Ecommerce_Jogos.Tests\\Selenium\\ClientesTests.cs",
-              "ViewState": "AgIAAHcAAAAAAAAAAAAAwJEBAAAnAAAAAAAAAA==",
+              "Title": "PedidosController.cs",
+              "DocumentMoniker": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\Ecommerce Jogos\\Controllers\\PedidosController.cs",
+              "RelativeDocumentMoniker": "Ecommerce Jogos\\Controllers\\PedidosController.cs",
+              "ToolTip": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\Ecommerce Jogos\\Controllers\\PedidosController.cs",
+              "RelativeToolTip": "Ecommerce Jogos\\Controllers\\PedidosController.cs",
+              "ViewState": "AgIAABUBAAAAAAAAAAAywCMBAAA9AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-22T00:41:36.992Z",
+              "WhenOpened": "2025-10-05T13:02:43.923Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "CarrinhoController.cs",
+              "DocumentMoniker": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\Ecommerce Jogos\\Controllers\\CarrinhoController.cs",
+              "RelativeDocumentMoniker": "Ecommerce Jogos\\Controllers\\CarrinhoController.cs",
+              "ToolTip": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\Ecommerce Jogos\\Controllers\\CarrinhoController.cs",
+              "RelativeToolTip": "Ecommerce Jogos\\Controllers\\CarrinhoController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADUAAABcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-05T12:40:41.813Z",
               "EditorCaption": ""
             }
           ]
