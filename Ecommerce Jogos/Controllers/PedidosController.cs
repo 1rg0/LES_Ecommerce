@@ -288,7 +288,6 @@ namespace Ecommerce_Jogos.Controllers
             }
 
             await _context.SaveChangesAsync();
-            //Descomentar para simular aprovação automática de pagamentos
             //await SimularAprovacaoPagamento(novoPedido.ID);
 
             return RedirectToAction("Confirmacao", new { pedidoId = novoPedido.ID });
