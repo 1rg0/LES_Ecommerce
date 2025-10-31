@@ -288,7 +288,7 @@ namespace Ecommerce_Jogos.Controllers
             }
 
             await _context.SaveChangesAsync();
-            //await SimularAprovacaoPagamento(novoPedido.ID);
+            await SimularAprovacaoPagamento(novoPedido.ID);
 
             return RedirectToAction("Confirmacao", new { pedidoId = novoPedido.ID });
         }

@@ -20,9 +20,12 @@ namespace Ecommerce_Jogos.Tests.Selenium
         private const string ClienteSenha = "Senha123@";
         private const int ProdutoId = 2;
         private const string NomeProdutoEsperado = "Starfield";
-        private const int EnderecoId = 95;
-        private const int CartaoId = 49;
+        private const int EnderecoId = 4;
+        private const int CartaoId = 2;
+        private const int CartaoId2 = 3;
         private const string CupomCodigo = "PROMO10";
+        private const string CupomTroca1 = "TROCA-1-638975233298761063";
+        private const string CupomTroca2 = "TROCA-2-638975233334073209";
 
         [SetUp]
         public void Setup()
@@ -109,6 +112,97 @@ namespace Ecommerce_Jogos.Tests.Selenium
             });
         }
 
+        [Test]
+        public void RealizarCompraPagamentoCombinado()
+        {
+            LoginCliente();
+            AdicionarProdutoAoCarrinho(ProdutoId);
+            AdicionarProdutoAoCarrinho(ProdutoId);
+            AdicionarProdutoAoCarrinho(ProdutoId);
+
+            NavegarParaCarrinho();
+            ScrollToAndClick(By.CssSelector("a.btn-finalizar-compra"));
+            _wait.Until(ExpectedConditions.UrlContains("/Checkout"));
+            _wait.Until(ExpectedConditions.ElementIsVisible(By.Id("address-selection")));
+
+            PreencherCheckoutBasico(EnderecoId);
+
+            AplicarCupom(CupomCodigo);
+            AplicarCupom(CupomTroca1);
+            AplicarCupom(CupomTroca2);
+
+            _wait.Until(driver => driver.FindElement(By.Id("valor-restante-resumo")).Text != "");
+            var valorRestanteTexto = _driver.FindElement(By.Id("valor-restante-resumo")).Text;
+            decimal valorRestanteNumerico = decimal.Parse(valorRestanteTexto.Replace("R$", "").Trim(), CultureInfo.GetCultureInfo("pt-BR"));
+
+            decimal valorCartao1 = 15.00m;
+            decimal valorCartao2 = valorRestanteNumerico - valorCartao1;
+
+            Assert.That(valorRestanteNumerico, Is.GreaterThan(20.00m), "O total após cupons é muito baixo (R$ " + valorRestanteNumerico + ") para testar 2 cartões. Use um produto mais caro ou ajuste os cupons.");
+
+            PreencherPagamentoUnicoCartao(CartaoId, valorCartao1.ToString("N2", CultureInfo.GetCultureInfo("pt-BR")));
+
+            PreencherPagamentoUnicoCartao(CartaoId2, valorCartao2.ToString("N2", CultureInfo.GetCultureInfo("pt-BR")));
+
+            _wait.Until(driver => driver.FindElement(By.Id("valor-restante-resumo")).Text.Contains("R$ 0,00"));
+
+            FinalizarCompra();
+
+            VerificarPaginaConfirmacao();
+        }
+
+        [Test]
+        public void DeveAdicionarEnderecoECartaoDuranteCheckout()
+        {
+            string idUnico = Guid.NewGuid().ToString().Substring(0, 5);
+            string apelidoEndereco = $"Endereço Teste {idUnico}";
+            string ultimosDigitosCartao = new Random().Next(1000, 9999).ToString();
+            string numeroCartao = $"1111 2222 3333 {ultimosDigitosCartao}";
+
+            NavegarParaCheckoutAposAdicionarProduto(ProdutoId);
+
+            ScrollToAndClick(By.LinkText("Adicionar Novo Endereço"));
+
+            _wait.Until(ExpectedConditions.UrlContains("/Enderecos/Create"));
+            _wait.Until(ExpectedConditions.ElementIsVisible(By.Id("Apelido"))).SendKeys(apelidoEndereco);
+            _driver.FindElement(By.Id("CEP")).SendKeys("12345-678");
+            new SelectElement(_driver.FindElement(By.Id("Tipo_LogradouroID"))).SelectByValue("1");
+            _driver.FindElement(By.Id("Logradouro")).SendKeys("Rua do Teste de Selenium");
+            _driver.FindElement(By.Id("Numero")).SendKeys("123");
+            _driver.FindElement(By.Id("Bairro")).SendKeys("Bairro Teste");
+            new SelectElement(_driver.FindElement(By.Id("CidadeID"))).SelectByValue("1");
+            new SelectElement(_driver.FindElement(By.Id("Tipo_EnderecoID"))).SelectByValue("1");
+            new SelectElement(_driver.FindElement(By.Id("Tipo_ResidenciaID"))).SelectByValue("1");
+
+            ScrollToAndClick(By.CssSelector("input[type='submit'][value='Finalizar Cadastro']"));
+
+            _wait.Until(ExpectedConditions.UrlContains("/Checkout"));
+            _wait.Until(ExpectedConditions.ElementIsVisible(By.Id("address-selection")));
+
+            var novoEnderecoLabel = _driver.FindElements(By.XPath($"//label[strong[contains(text(), '{apelidoEndereco}')]]"));
+            Assert.That(novoEnderecoLabel.Count, Is.GreaterThan(0), "O novo endereço cadastrado não apareceu na lista de checkout.");
+
+            ScrollToAndClick(By.LinkText("Adicionar Novo Cartão"));
+
+            _wait.Until(ExpectedConditions.UrlContains("/Cartoes/Create"));
+            SetMaskedInputValue(By.Id("NumeroCartao"), numeroCartao);
+            _driver.FindElement(By.Id("NomeImpresso")).SendKeys($"Teste Selenium {idUnico}");
+            SetMaskedInputValue(By.Id("DataValidade"), "122028");
+            new SelectElement(_driver.FindElement(By.Id("Bandeira"))).SelectByValue("Mastercard");
+            SetMaskedInputValue(By.Id("CodigoSeguranca"), "123");
+
+            ScrollToAndClick(By.CssSelector("input[type='submit'][value='Salvar Cartão']"));
+
+            _wait.Until(ExpectedConditions.UrlContains("/Checkout"));
+            _wait.Until(ExpectedConditions.ElementIsVisible(By.Id("lista-cartoes-pagamento")));
+
+            var novoCartaoLocator = By.XPath($"//label[contains(., 'Final **** {ultimosDigitosCartao}')]");
+
+            ScrollParaElemento(novoCartaoLocator);
+
+            var novoCartaoLabel = _driver.FindElements(novoCartaoLocator);
+            Assert.That(novoCartaoLabel.Count, Is.GreaterThan(0), "O novo cartão cadastrado não apareceu na lista de checkout.");
+        }
 
         private void LoginCliente()
         {
@@ -178,9 +272,15 @@ namespace Ecommerce_Jogos.Tests.Selenium
         private void PreencherPagamentoUnicoCartao(int cartaoId, string valorStringFormatada)
         {
             var cartaoLabelLocator = By.CssSelector($"label[for='cartao-{cartaoId}']");
-            ScrollToAndClick(cartaoLabelLocator);
+            var checkbox = _driver.FindElement(By.Id($"cartao-{cartaoId}"));
+            if (!checkbox.Selected)
+            {
+                ScrollToAndClick(cartaoLabelLocator);
+            }
+
             var valorCartaoInputLocator = By.CssSelector($"#valor-cartao-{cartaoId} input.valor-pagamento");
             var valorCartaoInput = _wait.Until(ExpectedConditions.ElementIsVisible(valorCartaoInputLocator));
+            valorCartaoInput.Clear();
             valorCartaoInput.SendKeys(valorStringFormatada);
         }
 
@@ -216,13 +316,41 @@ namespace Ecommerce_Jogos.Tests.Selenium
             }
         }
 
+        private void SetMaskedInputValue(By locator, string value)
+        {
+            var element = _wait.Until(ExpectedConditions.ElementIsVisible(locator));
+            IJavaScriptExecutor js = (IJavaScriptExecutor)_driver;
+
+            js.ExecuteScript("arguments[0].value = arguments[1];", element, value);
+
+            js.ExecuteScript("arguments[0].dispatchEvent(new Event('input', { bubbles: true }));", element);
+
+            js.ExecuteScript("arguments[0].dispatchEvent(new Event('change', { bubbles: true }));", element);
+        }
+
         private void ScrollToAndClick(By locator)
         {
             var element = _wait.Until(ExpectedConditions.ElementExists(locator));
             IJavaScriptExecutor js = (IJavaScriptExecutor)_driver;
             js.ExecuteScript("arguments[0].scrollIntoView({behavior: 'auto', block: 'center'});", element);
+            Thread.Sleep(500);
             _wait.Until(ExpectedConditions.ElementToBeClickable(element));
             element.Click();
+        }
+
+        private void ScrollParaElemento(By locator)
+        {
+            try
+            {
+                var element = _wait.Until(ExpectedConditions.ElementExists(locator));
+                IJavaScriptExecutor js = (IJavaScriptExecutor)_driver;
+                js.ExecuteScript("arguments[0].scrollIntoView({behavior: 'auto', block: 'center'});", element);
+                _wait.Until(ExpectedConditions.ElementIsVisible(locator));
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail($"Falha ao rolar para o elemento {locator}. Erro: {ex.Message}");
+            }
         }
     }
 }
