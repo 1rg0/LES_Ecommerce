@@ -84,7 +84,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
             catch (WebDriverTimeoutException)
             {
                 string statusAtual = "NÃO ENCONTRADO";
-                try { statusAtual = _driver.FindElement(statusBadgeLocator).Text; } catch (Exception) { /* Ignora */ }
+                try { statusAtual = _driver.FindElement(statusBadgeLocator).Text; } catch (Exception) {}
                 Assert.Fail($"A página foi recarregada, mas o status do pedido não mudou para 'EM TRÂNSITO'. Status encontrado: '{statusAtual}'.");
             }
 
@@ -135,7 +135,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
             catch (WebDriverTimeoutException)
             {
                 string statusAtual = "NÃO ENCONTRADO";
-                try { statusAtual = _driver.FindElement(statusBadgeLocator).Text; } catch (Exception) { /* Ignora */ }
+                try { statusAtual = _driver.FindElement(statusBadgeLocator).Text; } catch (Exception) {}
                 Assert.Fail($"A página foi recarregada, mas o status do pedido não mudou para 'ENTREGUE'. Status encontrado: '{statusAtual}'.");
             }
 
@@ -223,7 +223,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
             catch (WebDriverTimeoutException)
             {
                 string statusAtual = "NÃO ENCONTRADO";
-                try { statusAtual = _driver.FindElement(statusBadgeLocator).Text; } catch (Exception) { /* Ignora */ }
+                try { statusAtual = _driver.FindElement(statusBadgeLocator).Text; } catch (Exception) {}
                 Assert.Fail($"A página foi recarregada, mas o status do pedido não mudou para 'TROCADO'. Status encontrado: '{statusAtual}'.");
             }
 

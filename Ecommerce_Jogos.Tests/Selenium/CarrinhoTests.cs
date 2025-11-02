@@ -113,7 +113,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
         }
 
         [Test]
-        public void RealizarCompraPagamentoCombinado()
+        public void PagamentoCombinado()
         {
             LoginCliente();
             AdicionarProdutoAoCarrinho(ProdutoId);
@@ -152,7 +152,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
         }
 
         [Test]
-        public void DeveAdicionarEnderecoECartaoDuranteCheckout()
+        public void EnderecoCartaoCheckout()
         {
             string idUnico = Guid.NewGuid().ToString().Substring(0, 5);
             string apelidoEndereco = $"Endereço Teste {idUnico}";
@@ -185,11 +185,11 @@ namespace Ecommerce_Jogos.Tests.Selenium
             ScrollToAndClick(By.LinkText("Adicionar Novo Cartão"));
 
             _wait.Until(ExpectedConditions.UrlContains("/Cartoes/Create"));
-            SetMaskedInputValue(By.Id("NumeroCartao"), numeroCartao);
+            ValorComMascara(By.Id("NumeroCartao"), numeroCartao);
             _driver.FindElement(By.Id("NomeImpresso")).SendKeys($"Teste Selenium {idUnico}");
-            SetMaskedInputValue(By.Id("DataValidade"), "122028");
+            ValorComMascara(By.Id("DataValidade"), "122028");
             new SelectElement(_driver.FindElement(By.Id("Bandeira"))).SelectByValue("Mastercard");
-            SetMaskedInputValue(By.Id("CodigoSeguranca"), "123");
+            ValorComMascara(By.Id("CodigoSeguranca"), "123");
 
             ScrollToAndClick(By.CssSelector("input[type='submit'][value='Salvar Cartão']"));
 
@@ -198,7 +198,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
 
             var novoCartaoLocator = By.XPath($"//label[contains(., 'Final **** {ultimosDigitosCartao}')]");
 
-            ScrollParaElemento(novoCartaoLocator);
+            ScrollTo(novoCartaoLocator);
 
             var novoCartaoLabel = _driver.FindElements(novoCartaoLocator);
             Assert.That(novoCartaoLabel.Count, Is.GreaterThan(0), "O novo cartão cadastrado não apareceu na lista de checkout.");
@@ -316,7 +316,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
             }
         }
 
-        private void SetMaskedInputValue(By locator, string value)
+        private void ValorComMascara(By locator, string value)
         {
             var element = _wait.Until(ExpectedConditions.ElementIsVisible(locator));
             IJavaScriptExecutor js = (IJavaScriptExecutor)_driver;
@@ -338,7 +338,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
             element.Click();
         }
 
-        private void ScrollParaElemento(By locator)
+        private void ScrollTo(By locator)
         {
             try
             {
