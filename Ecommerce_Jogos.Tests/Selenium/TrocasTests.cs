@@ -21,7 +21,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
         private const int PedidoEntregueId = 3;
 
         private const string ItemPedidoChave = "3_2";
-        private const string MotivoTroca = "Teste automatizado - Produto veio com defeito na embalagem.";
+        private const string MotivoTroca = "Teste automatizado.";
 
 
         [SetUp]
@@ -93,7 +93,7 @@ namespace Ecommerce_Jogos.Tests.Selenium
                 {
                     statusAtual = _driver.FindElement(statusElementLocator).Text;
                 }
-                catch (Exception) { /* Ignora se não encontrar */ }
+                catch (Exception) {}
 
                 Assert.Fail($"A página foi recarregada, mas o status do pedido não mudou para 'EM TROCA'. Status encontrado: '{statusAtual}'.");
             }
