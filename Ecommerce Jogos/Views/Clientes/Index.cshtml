@@ -102,14 +102,6 @@
                             <button type="submit" class="btn btn-sm btn-success">Ativar</button>
                         }
                     </form>
-
-                    <button type="button" class="btn btn-sm btn-danger delete-btn"
-                            data-bs-toggle="modal"
-                            data-bs-target="#confirmDeleteModal"
-                            data-client-id="@cliente.Id"
-                            data-client-name="@cliente.NomeCompleto">
-                        Excluir
-                    </button>
                 </td>
             </tr>
         }
@@ -161,49 +153,8 @@
     </ul>
 </nav>
 
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalLabel">Confirmar Exclusão</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Tem certeza que deseja excluir permanentemente o cliente <strong id="clientNameToDelete"></strong>?</p>
-                <p>Esta ação não pode ser desfeita.</p>
-            </div>
-            <div class="modal-footer">
-                <form asp-action="Delete" method="post">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="id" id="deleteClientId" />
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-danger">Excluir</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-
-    <script>
-
-        document.addEventListener('DOMContentLoaded', function () 
-        {
-            var confirmDeleteModal = document.getElementById('confirmDeleteModal');
-            confirmDeleteModal.addEventListener('show.bs.modal', function (event) 
-            {
-                var button = event.relatedTarget;
-                var clientId = button.getAttribute('data-client-id');
-                var clientName = button.getAttribute('data-client-name');
-                var modalClientNameElement = confirmDeleteModal.querySelector('#clientNameToDelete');
-                var modalHiddenInputElement = confirmDeleteModal.querySelector('#deleteClientId');
-                modalClientNameElement.textContent = clientName;
-                modalHiddenInputElement.value = clientId;
-            });
-        });
-    </script>
 }

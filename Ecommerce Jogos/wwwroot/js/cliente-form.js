@@ -40,6 +40,46 @@
     const formCartao = document.getElementById('form-cartao');
 
 
+    function validarIdadeMinima(dataNascimentoString) {
+        if (!dataNascimentoString) {
+            return { valido: false, mensagem: 'A data de nascimento é obrigatória.' };
+        }
+
+        const birthDate = new Date(dataNascimentoString);
+        birthDate.setMinutes(birthDate.getMinutes() + birthDate.getTimezoneOffset());
+
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+
+        if (age < 18) {
+            return { valido: false, mensagem: 'O cliente deve ter no mínimo 18 anos.' };
+        }
+
+        return { valido: true };
+    }
+
+    function validarDataValidade(dataString) {
+        if (!/^(0[1-9]|1[0-2])\/\d{4}$/.test(dataString)) {
+            return false;
+        }
+
+        const [mesStr, anoStr] = dataString.split('/');
+        const mes = parseInt(mesStr, 10);
+        const ano = parseInt(anoStr, 10);
+
+        const dataValidade = new Date(ano, mes, 0);
+        const dataAtual = new Date();
+        dataAtual.setDate(1);
+        dataAtual.setHours(0, 0, 0, 0);
+
+        return dataValidade >= dataAtual;
+    }
+
     btnAbrirModalEndereco.addEventListener('click', function () {
         idEmEdicao = null;
         formEndereco.reset();
@@ -119,7 +159,6 @@
 
         document.getElementById('dataValidadeCartao').value = '';
 
-        // Adicione estas 2 linhas para limpar o erro ao abrir o modal
         document.getElementById('numero-cartao-error').style.display = 'none';
         document.getElementById('numeroCartao').classList.remove('is-invalid');
     });
@@ -139,6 +178,20 @@
         } else {
             numeroCartaoErrorSpan.style.display = 'none';
             numeroCartaoInput.classList.remove('is-invalid');
+        }
+
+        const dataValidadeInput = document.getElementById('dataValidadeCartao');
+        const dataValidadeErrorSpan = document.getElementById('data-validade-error');
+        const dataValidade = dataValidadeInput.value;
+
+        if (!validarDataValidade(dataValidade)) {
+            dataValidadeErrorSpan.innerText = 'Data de validade inválida ou expirada. Use o formato MM/AAAA.';
+            dataValidadeErrorSpan.style.display = 'block';
+            dataValidadeInput.classList.add('is-invalid');
+            return;
+        } else {
+            dataValidadeErrorSpan.style.display = 'none';
+            dataValidadeInput.classList.remove('is-invalid');
         }
 
         let isPreferencial = document.getElementById('preferencial').checked;
@@ -221,6 +274,25 @@
 
     formPrincipal.addEventListener('submit', async function (event) {
         event.preventDefault();
+
+        document.querySelectorAll('.text-danger').forEach(span => span.textContent = '');
+        document.getElementById('business-alerts').style.display = 'none';
+
+        const dataNascimentoInput = document.getElementById('DataNascimento');
+        const dataNascimentoSpan = dataNascimentoInput.nextElementSibling;
+
+        const validacaoIdade = validarIdadeMinima(dataNascimentoInput.value);
+
+        if (!validacaoIdade.valido) {
+            dataNascimentoSpan.textContent = validacaoIdade.mensagem;
+            dataNascimentoInput.classList.add('is-invalid');
+            window.scrollTo(0, dataNascimentoInput.offsetTop);
+            return;
+        } else {
+            dataNascimentoInput.classList.remove('is-invalid');
+            dataNascimentoSpan.textContent = '';
+        }
+
         const formData = new FormData(formPrincipal);
         const clienteData = Object.fromEntries(formData.entries());
 

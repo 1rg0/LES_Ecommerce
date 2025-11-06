@@ -392,33 +392,13 @@ namespace Ecommerce_Jogos.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var produto = await _context.Produtos.FindAsync(id);
-            if (produto == null)
-            {
-                return NotFound();
-            }
-
-            var entradasDeEstoque = await _context.EntradasEstoque
-                                  .Where(e => e.ProdutoID == id)
-                                  .ToListAsync();
-
-            if (entradasDeEstoque.Any())
-            {
-                _context.EntradasEstoque.RemoveRange(entradasDeEstoque);
-            }
-
-            _context.Produtos.Remove(produto);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleStatus(int id, string motivo)
         {
+            if (string.IsNullOrWhiteSpace(motivo))
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
             var dadosAntigos = await _context.Produtos
                 .Include(p => p.Categorias)
                 .AsNoTracking()
