@@ -105,6 +105,9 @@ namespace Ecommerce_Jogos.Data
 
             modelBuilder.Entity<ItemTroca>().ToTable("ItemTroca")
                 .HasKey(it => new { it.TrocaID, it.ItemPedidoPedidoID, it.ItemPedidoProdutoID });
+
+            modelBuilder.Entity<Cartao>().HasQueryFilter(c => c.Ativo);
+            modelBuilder.Entity<Endereco>().HasQueryFilter(e => e.Ativo);
         }
     }
 }

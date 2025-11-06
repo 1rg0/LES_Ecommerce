@@ -357,20 +357,6 @@ namespace Ecommerce_Jogos.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var cliente = await _context.Clientes.FindAsync(id);
-            if (cliente != null)
-            {
-                _context.Clientes.Remove(cliente);
-                await _context.SaveChangesAsync();
-            }
-
-            return RedirectToAction(nameof(Index));
-        }
-
-        [HttpPost]
         public IActionResult ToggleStatus(int id)
         {
             var cliente = _context.Clientes.Find(id);

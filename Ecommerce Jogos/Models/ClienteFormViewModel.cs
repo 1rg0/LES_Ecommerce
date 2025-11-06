@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Ecommerce_Jogos.Validacoes;
 
 namespace Ecommerce_Jogos.Models
 {
@@ -19,6 +20,7 @@ namespace Ecommerce_Jogos.Models
         [Required(ErrorMessage = "A data de nascimento é obrigatória")]
         [Display(Name = "Data de Nascimento")]
         [DataType(DataType.Date)]
+        [IdadeMinima(18, ErrorMessage = "O cliente deve ter no mínimo 18 anos.")]
         public DateTime DataNascimento { get; set; }
 
         [Required(ErrorMessage = "O tipo de telefone é obrigatório")]

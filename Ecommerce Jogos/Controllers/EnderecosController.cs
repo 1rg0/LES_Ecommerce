@@ -251,7 +251,19 @@ namespace Ecommerce_Jogos.Controllers
                 return RedirectToAction("Index", new { clienteId = clienteId });
             }
 
-            _context.Enderecos.Remove(enderecoParaExcluir);
+            var dadosAntigos = new { Ativo = enderecoParaExcluir.Ativo };
+
+            enderecoParaExcluir.Ativo = false;
+
+            await _logService.RegistrarLog(
+                    adminId: GetCurrentAdminId(),
+                    tipoOperacao: "INATIVAÇÃO",
+                    tabela: "Endereco",
+                    registroId: enderecoParaExcluir.ID,
+                    dadosAntigos: dadosAntigos,
+                    dadosNovos: new { Ativo = enderecoParaExcluir.Ativo },
+                    motivo: "Endereco inativado (soft delete) pelo administrador."
+            );
 
             await _context.SaveChangesAsync();
 

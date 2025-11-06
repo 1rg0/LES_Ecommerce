@@ -142,7 +142,43 @@ namespace Ecommerce_Jogos.Controllers
 
             int clienteId = cartao.ClienteID;
 
-            _context.Cartoes.Remove(cartao);
+            var dadosAntigos = new { Ativo = cartao.Ativo, Preferencial = cartao.Preferencial };
+
+            cartao.Ativo = false;
+
+            if (cartao.Preferencial)
+            {
+                cartao.Preferencial = false;
+
+                var novoCartaoPreferencial = await _context.Cartoes
+                    .Where(c => c.ClienteID == clienteId && c.ID != id)
+                    .OrderBy(c => c.ID)
+                    .FirstOrDefaultAsync();
+
+                if (novoCartaoPreferencial != null)
+                {
+                    novoCartaoPreferencial.Preferencial = true;
+                    await _logService.RegistrarLog(
+                        adminId: GetCurrentAdminId(),
+                        tipoOperacao: "ALTERAÇÃO",
+                        tabela: "Cartao",
+                        registroId: novoCartaoPreferencial.ID,
+                        dadosAntigos: new { Preferencial = false },
+                        dadosNovos: new { Preferencial = true },
+                        motivo: $"Definido como preferencial automaticamente após inativação do cartão ID {id}."
+                    );
+                }
+            }
+
+            await _logService.RegistrarLog(
+                    adminId: GetCurrentAdminId(),
+                    tipoOperacao: "INATIVAÇÃO",
+                    tabela: "Cartao",
+                    registroId: cartao.ID,
+                    dadosAntigos: dadosAntigos,
+                    dadosNovos: new { Ativo = cartao.Ativo, Preferencial = cartao.Preferencial },
+                    motivo: "Cartão inativado (soft delete) pelo administrador."
+            );
 
             await _context.SaveChangesAsync();
 

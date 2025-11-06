@@ -9,6 +9,7 @@
         public required string Bairro { get; set; }
         public required string CEP { get; set; }
         public string? Observacao { get; set; }
+        public bool Ativo { get; set; }
 
         public int ClienteID { get; set; }
         public Cliente? Cliente { get; set; }

@@ -41,7 +41,7 @@ namespace Ecommerce_Jogos.Controllers
             var cliente = await _context.Clientes
                                         .FirstOrDefaultAsync(c => c.Email == viewModel.Email);
 
-            if (cliente != null && BCrypt.Net.BCrypt.Verify(viewModel.Senha, cliente.SenhaHash))
+            if (cliente != null && cliente.Ativo && BCrypt.Net.BCrypt.Verify(viewModel.Senha, cliente.SenhaHash))
             {
                 claims.Add(new Claim(ClaimTypes.Name, cliente.Email));
                 claims.Add(new Claim("FullName", cliente.NomeCompleto));

@@ -1,6 +1,9 @@
-﻿@model Pedido
+﻿@using System.Security.Claims
+
+@model Pedido
 @{
     ViewData["Title"] = $"Detalhes do Pedido #{Model.ID}";
+    var userType = User.FindFirst("UserType")?.Value;
     var pagamentos = ViewBag.Pagamentos as List<PagamentoPedido>;
     var cuponsUtilizados = ViewBag.CuponsUtilizados as List<Cupom>;
     var cupomGerado = ViewBag.CupomGerado as Cupom;
@@ -147,9 +150,18 @@
     </div>
 
     <div class="text-center mt-4">
-        <a asp-controller="Clientes" asp-action="Details" asp-route-id="@Model.ClienteID" class="btn btn-primary">Ver Meus Pedidos</a>
-        <a asp-controller="Produtos" asp-action="Catalogo" class="btn btn-outline-secondary">Continuar Comprando</a>
-        @if (Model.Status == "ENTREGUE")
+        @if (userType == "Cliente")
+        {
+            <a asp-controller="Clientes" asp-action="Details" asp-route-id="@Model.ClienteID" class="btn btn-primary">Ver Meus Pedidos</a>
+            <a asp-controller="Produtos" asp-action="Catalogo" class="btn btn-outline-secondary">Continuar Comprando</a>
+        }
+        else
+        {
+            <a asp-controller="Pedidos" asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar para a lista de Pedidos
+            </a>
+        }
+        @if (Model.Status == "ENTREGUE" && userType == "Cliente")
         {
             <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#trocaModal" data-pedido-id="@Model.ID">
                 <i class="bi bi-arrow-repeat"></i> Solicitar Troca

@@ -117,43 +117,17 @@
 
                     @if (produto.Ativo)
                     {
-                        <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#statusChangeModal" data-product-id="@produto.ID" data-product-name="@produto.Nome" data-action-type="inativar">Inativar</button>
+                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#statusChangeModal" data-product-id="@produto.ID" data-product-name="@produto.Nome" data-action-type="inativar">Inativar</button>
                     }
                     else
                     {
                         <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#statusChangeModal" data-product-id="@produto.ID" data-product-name="@produto.Nome" data-action-type="ativar">Ativar</button>
                     }
-
-                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal" data-product-id="@produto.ID" data-product-name="@produto.Nome">Excluir</button>
                 </td>
             </tr>
         }
     </tbody>
 </table>
-
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalLabel">Confirmar Exclusão</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p>Tem certeza que deseja excluir permanentemente o produto <strong id="productNameToDelete"></strong>?</p>
-            </div>
-            <div class="modal-footer">
-
-                <form asp-controller="Produtos" asp-action="Delete" method="post">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="id" id="deleteProductId" />
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-danger">Excluir</button>
-                </form>
-
-            </div>
-        </div>
-    </div>
-</div>
 
 <div class="modal fade" id="statusChangeModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -186,22 +160,6 @@
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-
-            var confirmDeleteModal = document.getElementById('confirmDeleteModal');
-            if (confirmDeleteModal) {
-                confirmDeleteModal.addEventListener('show.bs.modal', function (event) {
-                    var button = event.relatedTarget;
-                    var productId = button.getAttribute('data-product-id');
-                    var productName = button.getAttribute('data-product-name');
-
-                    var modalProductNameElement = confirmDeleteModal.querySelector('#productNameToDelete');
-                    var modalHiddenInputElement = confirmDeleteModal.querySelector('#deleteProductId');
-
-                    modalProductNameElement.textContent = `"${productName}"`;
-                    modalHiddenInputElement.value = productId;
-                });
-            }
-
             var statusChangeModal = document.getElementById('statusChangeModal');
             if (statusChangeModal) {
                 var statusForm = document.getElementById('statusChangeForm');
@@ -224,8 +182,13 @@
                     modalHiddenInputElement.value = productId;
                 });
 
-                confirmButton.addEventListener('click', function() {
-                    statusForm.submit();
+               confirmButton.addEventListener('click', function() {
+                    if (statusForm.checkValidity()) {
+                        statusForm.submit();
+                    } 
+                    else {
+                        statusForm.reportValidity();
+                    }
                 });
             }
         });
