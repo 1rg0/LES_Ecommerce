@@ -76,29 +76,25 @@
 
 @section Scripts {
     <script>
-        // Armazena as listas de produtos e categorias vindas do ViewModel
         const produtos = @Html.Raw(Json.Serialize(Model.Produtos));
         const categorias = @Html.Raw(Json.Serialize(Model.Categorias));
         let graficoVendasChart;
 
-        // Função para popular o dropdown de itens
         function popularItens(tipo) {
             const select = $('#ids');
-            select.empty(); // Limpa as opções atuais
+            select.empty();
             const lista = (tipo === 'produto') ? produtos : categorias;
             lista.forEach(item => {
                 select.append(new Option(item.text, item.value));
             });
         }
 
-        // Função para atualizar a tabela de dados detalhados
         function atualizarTabela(labels, datasets) {
             const thead = $('#tabela-detalhes-header');
             const tbody = $('#tabela-detalhes-body');
             thead.empty();
             tbody.empty();
 
-            // Cria o cabeçalho da tabela
             let headerRow = '<tr><th>Data</th>';
             datasets.forEach(ds => {
                 headerRow += `<th class="text-end">${ds.label}</th>`;
@@ -106,7 +102,6 @@
             headerRow += '<th class="text-end">Total</th></tr>';
             thead.append(headerRow);
 
-            // Preenche as linhas da tabela
             labels.forEach((label, index) => {
                 let bodyRow = `<tr><td>${label}</td>`;
                 let totalLinha = 0;
@@ -124,17 +119,14 @@
 
 
         $(document).ready(function () {
-            // Popula a lista de itens inicialmente com os produtos
             popularItens('produto');
 
-            // Event listener para trocar a lista ao selecionar Categoria/Produto
             $('input[name="tipoComparacao"]').change(function () {
                 popularItens(this.value);
             });
 
-            // Event listener para o envio do formulário
             $('#form-analise').submit(function (e) {
-                e.preventDefault(); // Previne o recarregamento da página
+                e.preventDefault();
 
                 const btn = $(this).find('button[type="submit"]');
                 const spinner = $('#filtro-spinner');
@@ -142,7 +134,6 @@
                 btn.prop('disabled', true);
                 spinner.removeClass('d-none');
 
-                // Coleta os dados do formulário
                 const formData = {
                     dataInicio: $('#dataInicio').val(),
                     dataFim: $('#dataFim').val(),
@@ -150,7 +141,6 @@
                     ids: $('#ids').val()
                 };
 
-                // Chamada AJAX para o Controller
                 $.ajax({
                     url: '@Url.Action("ObterDadosAnalise", "Analise")',
                     type: 'POST',
@@ -159,20 +149,16 @@
                     success: function (response) {
                         const { labels, datasets } = response;
 
-                        // Atualiza o rodapé do card com os itens sendo comparados
                         const nomesItens = datasets.map(d => d.label).join(', ');
                         $('#info-comparacao').text(nomesItens);
                         $('#card-footer-info').show();
 
-                        // Atualiza a tabela de dados
                         atualizarTabela(labels, datasets);
 
-                        // Destrói o gráfico anterior, se existir
                         if (graficoVendasChart) {
                             graficoVendasChart.destroy();
                         }
 
-                        // Cria o novo gráfico
                         const ctx = document.getElementById('graficoVendas').getContext('2d');
                         graficoVendasChart = new Chart(ctx, {
                             type: 'line',
@@ -183,13 +169,13 @@
                             options: {
                                 responsive: true,
                                 scales: {
-                                    x: { // Configuração do eixo X (horizontal)
+                                    x: {
                                         title: {
                                             display: true,
                                             text: 'Data'
                                         }
                                     },
-                                    y: { // Configuração do eixo Y (vertical)
+                                    y: {
                                         beginAtZero: true,
                                         title: {
                                             display: true,
