@@ -483,6 +483,65 @@ namespace Ecommerce_Jogos.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RecusarTroca(int id, string motivo)
+        {
+            if (string.IsNullOrWhiteSpace(motivo))
+            {
+                TempData["ErrorMessage"] = "O motivo é obrigatório para recusar uma troca.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var pedido = await _context.Pedidos.FindAsync(id);
+            if (pedido == null)
+            {
+                return NotFound();
+            }
+
+            if (pedido.Status != "EM TROCA")
+            {
+                TempData["ErrorMessage"] = $"A troca do pedido #{id} não pode ser recusada pois seu status atual é '{pedido.Status}'.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var dadosAntigos = new { Status = pedido.Status };
+
+            pedido.Status = "ENTREGUE";
+
+            var troca = await _context.Trocas.FirstOrDefaultAsync(t => t.PedidoID == id && t.StatusTroca != "FINALIZADA");
+            if (troca != null)
+            {
+                troca.StatusTroca = "RECUSADA";
+                troca.Motivo += $" | Motivo da recusa: {motivo}";
+            }
+
+            var novaNotificacao = new Notificacao
+            {
+                ClienteID = pedido.ClienteID,
+                Mensagem = $"Sua solicitação de troca para o pedido #{pedido.ID} foi recusada. Motivo: {motivo}",
+                Url = Url.Action("Details", "Pedidos", new { id = pedido.ID }),
+                DataCriacao = DateTime.Now,
+                Lida = false
+            };
+            _context.Notificacoes.Add(novaNotificacao);
+
+            await _logService.RegistrarLog(
+                adminId: GetCurrentAdminId(),
+                tipoOperacao: "ALTERAÇÃO",
+                tabela: "Pedido",
+                registroId: pedido.ID,
+                dadosAntigos: dadosAntigos,
+                dadosNovos: new { Status = pedido.Status },
+                motivo: $"Troca recusada pelo administrador. Motivo: {motivo}"
+            );
+
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = $"Troca do pedido #{id} recusada com sucesso!";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ConfirmarRecebimentoTroca(int id, bool retornarAoEstoque)
         {
             var pedido = await _context.Pedidos

@@ -31,11 +31,10 @@ namespace Ecommerce_Jogos.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ObterRecomendacao([FromBody] PerguntaViewModel perguntaCompleta) // Alterado para receber o novo ViewModel
+        public async Task<IActionResult> ObterRecomendacao([FromBody] PerguntaViewModel perguntaCompleta)
         {
             var clienteId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-            // 1. Coletar o contexto (sem alterações aqui)
             var historicoCompras = await _context.Pedidos
                 .Where(p => p.ClienteID == clienteId && p.Status == "ENTREGUE")
                 .SelectMany(p => p.ItensPedido)
@@ -48,11 +47,9 @@ namespace Ecommerce_Jogos.Controllers
                 .Select(p => p.Nome)
                 .ToListAsync();
 
-            // 2. Montar o Prompt para o Gemini, agora incluindo o histórico do chat
             var apiKey = _configuration["Gemini:ApiKey"];
             var prompt = MontarPrompt(historicoCompras, catalogoProdutos, perguntaCompleta.Texto, perguntaCompleta.Historico); // Passa o histórico
 
-            // 3. Chamar a API do Gemini (sem alterações aqui)
             var apiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={apiKey}";
             var requestBody = new
             {
@@ -71,7 +68,6 @@ namespace Ecommerce_Jogos.Controllers
                 return BadRequest($"Não foi possível obter uma recomendação no momento. Erro: {errorContent}");
             }
 
-            // 4. Processar a resposta e retornar para o front-end (sem alterações aqui)
             var jsonResponse = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
             var iaResponseText = jsonResponse.RootElement
                                              .GetProperty("candidates")[0]
@@ -83,12 +79,11 @@ namespace Ecommerce_Jogos.Controllers
             return Ok(new { resposta = iaResponseText });
         }
 
-        private string MontarPrompt(List<string> compras, List<string> catalogo, string pergunta, List<ChatMessage> historicoChat) // Alterado para receber o histórico
+        private string MontarPrompt(List<string> compras, List<string> catalogo, string pergunta, List<ChatMessage> historicoChat)
         {
             var historico = compras.Any() ? string.Join(", ", compras) : "O cliente ainda não possui compras.";
             var catalogoDisponivel = string.Join("\n- ", catalogo);
 
-            // Constrói a parte do histórico da conversa para o prompt
             var historicoDaConversa = new StringBuilder();
             if (historicoChat != null && historicoChat.Any())
             {

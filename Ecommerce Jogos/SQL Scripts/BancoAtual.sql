@@ -59,6 +59,7 @@ CREATE TABLE `cartao` (
   `Bandeira` varchar(45) NOT NULL,
   `DataValidade` varchar(7) NOT NULL COMMENT 'Data de validade no formato MM/AAAA',
   `Preferencial` tinyint(1) NOT NULL DEFAULT '0',
+  `Ativo` bit(1) NOT NULL DEFAULT b'1',
   PRIMARY KEY (`ID`),
   KEY `fk_Cartao_Cliente_idx` (`ClienteID`),
   CONSTRAINT `fk_Cartao_Cliente` FOREIGN KEY (`ClienteID`) REFERENCES `cliente` (`ID`) ON DELETE CASCADE
@@ -71,7 +72,7 @@ CREATE TABLE `cartao` (
 
 LOCK TABLES `cartao` WRITE;
 /*!40000 ALTER TABLE `cartao` DISABLE KEYS */;
-INSERT INTO `cartao` VALUES (1,1,'Igor F de Matos','1212','Visa','12/2028',1),(2,2,'X','1212','Visa','12/2028',1),(3,2,'X','2121','Mastercard','12/2028',0);
+INSERT INTO `cartao` VALUES (1,1,'Igor F de Matos','1212','Visa','12/2028',1,_binary ''),(2,2,'X','1212','Visa','12/2028',1,_binary ''),(3,2,'X','2121','Mastercard','12/2028',0,_binary '');
 /*!40000 ALTER TABLE `cartao` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -244,6 +245,7 @@ CREATE TABLE `endereco` (
   `Bairro` varchar(100) NOT NULL,
   `CEP` varchar(9) NOT NULL,
   `Observacao` varchar(255) DEFAULT NULL,
+  `Ativo` bit(1) NOT NULL DEFAULT b'1',
   PRIMARY KEY (`ID`),
   KEY `fk_Endereco_Cliente_idx` (`ClienteID`),
   KEY `fk_Endereco_TipoEnd_idx` (`Tipo_EnderecoID`),
@@ -264,7 +266,7 @@ CREATE TABLE `endereco` (
 
 LOCK TABLES `endereco` WRITE;
 /*!40000 ALTER TABLE `endereco` DISABLE KEYS */;
-INSERT INTO `endereco` VALUES (1,1,'Primeiro',2,1,1,2,'X','100','Bairro A','12345-678','Não deletar'),(2,1,'Segundo',1,1,1,1,'Y','200','Bairro B','87654-321','Não deletar'),(3,2,'Teste - Cobrança',2,1,1,2,'X','100','Bairro A','12345-678',''),(4,2,'Teste - Entrega',1,1,1,2,'X','100','Bairro A','12345-678','');
+INSERT INTO `endereco` VALUES (1,1,'Primeiro',2,1,1,2,'X','100','Bairro A','12345-678','Não deletar',_binary ''),(2,1,'Segundo',1,1,1,1,'Y','200','Bairro B','87654-321','Não deletar',_binary ''),(3,2,'Teste - Cobrança',2,1,1,2,'X','100','Bairro A','12345-678','',_binary ''),(4,2,'Teste - Entrega',1,1,1,2,'X','100','Bairro A','12345-678','',_binary '');
 /*!40000 ALTER TABLE `endereco` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -914,4 +916,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-10-31 16:29:09
+-- Dump completed on 2025-11-09 10:16:58

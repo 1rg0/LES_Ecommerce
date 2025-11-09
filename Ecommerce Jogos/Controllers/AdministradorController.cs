@@ -18,7 +18,7 @@ namespace Ecommerce_Jogos.Controllers
         {
             var viewModel = new AlterarSenhaViewModel
             {
-                ClienteID = id // Usamos o mesmo ViewModel, então o nome é ClienteID
+                ClienteID = id
             };
             return View(viewModel);
         }

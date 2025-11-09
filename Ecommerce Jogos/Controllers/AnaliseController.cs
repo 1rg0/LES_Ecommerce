@@ -44,7 +44,6 @@ namespace Ecommerce_Jogos.Controllers
         [HttpPost]
         public async Task<IActionResult> ObterDadosAnalise([FromBody] FiltroAnaliseViewModel filtro)
         {
-            // A primeira parte (a consulta de vendas) continua a mesma
             if (filtro.Ids == null || !filtro.Ids.Any())
             {
                 return BadRequest("Nenhum item selecionado para comparação.");
@@ -63,7 +62,7 @@ namespace Ecommerce_Jogos.Controllers
                     .Select(g => new VendaAgrupadaDia { Data = g.Key.Data, IdItem = g.Key.ProdutoID, NomeItem = g.Key.Nome, Quantidade = g.Sum(ip => ip.Quantidade) })
                     .ToListAsync();
             }
-            else // categoria
+            else
             {
                 var produtosPorCategoria = _context.ProdutoCategorias.Where(pc => filtro.Ids.Contains(pc.CategoriaID)).Select(pc => pc.ProdutoID);
                 itensVendidosQuery = itensVendidosQuery.Where(ip => produtosPorCategoria.Contains(ip.ProdutoID));
@@ -72,16 +71,12 @@ namespace Ecommerce_Jogos.Controllers
                 vendasAgrupadas = vendasPorProduto.SelectMany(v => v.CategoriasDoProduto.Where(catId => filtro.Ids.Contains(catId)).Select(catId => new { v.Data, CategoriaId = catId, v.Quantidade })).GroupBy(x => new { x.Data, x.CategoriaId }).Select(g => new VendaAgrupadaDia { Data = g.Key.Data, IdItem = g.Key.CategoriaId, NomeItem = categoriasLookup.ContainsKey(g.Key.CategoriaId) ? categoriasLookup[g.Key.CategoriaId] : "Categoria Desconhecida", Quantidade = g.Sum(x => x.Quantidade) }).ToList();
             }
 
-            // --- Montagem da resposta para o Chart.js ---
-
-            // 1. Criar todos os labels de data para o período completo
             var labels = new List<string>();
             for (var dt = filtro.DataInicio.Date; dt <= filtro.DataFim.Date; dt = dt.AddDays(1))
             {
                 labels.Add(dt.ToString("dd/MM"));
             }
 
-            // --- ALTERAÇÃO AQUI: Buscando todos os nomes antecipadamente ---
             var nomesLookup = new Dictionary<int, string>();
             if (filtro.TipoComparacao == "produto")
             {
@@ -100,16 +95,13 @@ namespace Ecommerce_Jogos.Controllers
             var cores = new[] { "rgba(75, 192, 192, 1)", "rgba(255, 99, 132, 1)", "rgba(54, 162, 235, 1)", "rgba(255, 206, 86, 1)", "rgba(153, 102, 255, 1)" };
             var corIndex = 0;
 
-            // 2. Para cada ID de item selecionado, criar um dataset
             foreach (var id in filtro.Ids)
             {
                 var itemData = vendasAgrupadas.Where(v => v.IdItem == id).ToDictionary(v => v.Data, v => v.Quantidade);
 
-                // --- ALTERAÇÃO AQUI: Usando o dicionário de nomes ---
                 var nomeItem = nomesLookup.ContainsKey(id) ? nomesLookup[id] : $"Item Desconhecido {id}";
 
                 var dataPoints = new List<int>();
-                // 3. Preencher os dados de venda para cada dia do período
                 for (var dt = filtro.DataInicio.Date; dt <= filtro.DataFim.Date; dt = dt.AddDays(1))
                 {
                     dataPoints.Add(itemData.ContainsKey(dt) ? itemData[dt] : 0);
@@ -128,11 +120,6 @@ namespace Ecommerce_Jogos.Controllers
             }
 
             return Ok(new { labels, datasets });
-        }
-
-        public IActionResult Details(int id)
-        {
-            return View();
         }
 
         private class VendaAgrupadaDia

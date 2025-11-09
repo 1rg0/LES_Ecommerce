@@ -22,18 +22,14 @@ namespace Ecommerce_Jogos.ViewComponents
 
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            // Pega o HttpContext atual
             var httpContext = _httpContextAccessor.HttpContext;
 
-            // Verifica se o usuário está autenticado
             if (httpContext.User.Identity.IsAuthenticated)
             {
-                // Pega o ID do cliente a partir das claims
                 var clienteIdClaim = httpContext.User.FindFirst(ClaimTypes.NameIdentifier);
 
                 if (clienteIdClaim != null && int.TryParse(clienteIdClaim.Value, out int clienteId))
                 {
-                    // Busca as 5 notificações mais recentes não lidas para o cliente
                     var notificacoes = await _context.Notificacoes
                         .Where(n => n.ClienteID == clienteId && !n.Lida)
                         .OrderByDescending(n => n.DataCriacao)
@@ -43,8 +39,6 @@ namespace Ecommerce_Jogos.ViewComponents
                     return View(notificacoes);
                 }
             }
-
-            // Se o usuário não estiver logado ou não for um cliente, retorna uma view vazia
             return View(new List<Notificacao>());
         }
     }

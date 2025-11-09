@@ -116,6 +116,13 @@
                                 data-pedido-id="@pedido.ID">
                             Autorizar Troca
                         </button>
+
+                        <button type="button" class="btn btn-sm btn-danger btn-recusar-troca"
+                                data-bs-toggle="modal"
+                                data-bs-target="#recusarTrocaModal"
+                                data-pedido-id="@pedido.ID">
+                            Recusar
+                        </button>
                     }
 
                     @if (pedido.Status == "TROCA AUTORIZADA")
@@ -262,6 +269,35 @@
     </div>
 </div>
 
+<div class="modal fade" id="recusarTrocaModal" tabindex="-1" aria-labelledby="recusarTrocaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="recusarTrocaModalLabel">Recusar Solicitação de Troca</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-controller="Pedidos" asp-action="RecusarTroca" method="post" id="recusarTrocaForm">
+                <div class="modal-body">
+                    <p>Você está prestes a <strong>recusar</strong> a solicitação de troca deste pedido.</p>
+                    <p>O status do pedido será revertido para "ENTREGUE" e o cliente será notificado.</p>
+                    <hr>
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" id="recusarTrocaPedidoId" />
+                    <div class="form-group">
+                        <label for="recusarTrocaMotivo" class="form-label">Motivo da Recusa (Obrigatório)</label>
+                        <textarea id="recusarTrocaMotivo" name="motivo" class="form-control" rows="3" required></textarea>
+                        <span class="text-danger" id="recusarMotivoError" style="display: none; font-size: 0.875em;">O motivo é obrigatório.</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Sim, Recusar Troca</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         $(document).ready(function() {
@@ -280,6 +316,23 @@
             $(document).on('click', '.btn-receber-troca', function() {
                 var pedidoId = $(this).data('pedido-id');
                 $('#receberTrocaPedidoId').val(pedidoId);
+            });
+
+            $(document).on('click', '.btn-recusar-troca', function() {
+                    var pedidoId = $(this).data('pedido-id');
+                    $('#recusarTrocaPedidoId').val(pedidoId);
+                    $('#recusarTrocaMotivo').val('');
+                    $('#recusarMotivoError').hide();
+            });
+
+            $('#recusarTrocaForm').on('submit', function(e) {
+                var motivo = $('#recusarTrocaMotivo').val();
+                if (!motivo || motivo.trim() === '') {
+                    $('#recusarMotivoError').show();
+                    e.preventDefault();
+                } else {
+                    $('#recusarMotivoError').hide();
+                }
             });
         });
     </script>
