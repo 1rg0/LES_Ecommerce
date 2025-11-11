@@ -48,15 +48,16 @@ namespace Ecommerce_Jogos.Controllers
                 .ToListAsync();
 
             var apiKey = _configuration["Gemini:ApiKey"];
-            var prompt = MontarPrompt(historicoCompras, catalogoProdutos, perguntaCompleta.Texto, perguntaCompleta.Historico); // Passa o histórico
+            var prompt = MontarPrompt(historicoCompras, catalogoProdutos, perguntaCompleta.Texto, perguntaCompleta.Historico);
 
-            var apiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={apiKey}";
+            var modelName = "gemini-2.5-flash";
+            var apiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/{modelName}:generateContent?key={apiKey}";
             var requestBody = new
             {
                 contents = new[]
                 {
-            new { parts = new[] { new { text = prompt } } }
-        }
+                    new { parts = new[] { new { text = prompt } } }
+                }
             };
 
             var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");

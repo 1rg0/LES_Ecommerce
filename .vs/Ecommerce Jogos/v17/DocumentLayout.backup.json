@@ -3,12 +3,19 @@
   "WorkspaceRootPath": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{86E6193F-BA56-4045-8C14-6CBEFF7EFF95}|Ecommerce Jogos\\Ecommerce Jogos.csproj|d:\\fatec\\lab de engenharia de software\\projeto\\les_ecommerce\\ecommerce jogos\\controllers\\pedidoscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{86E6193F-BA56-4045-8C14-6CBEFF7EFF95}|Ecommerce Jogos\\Ecommerce Jogos.csproj|solutionrelative:ecommerce jogos\\controllers\\pedidoscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{86E6193F-BA56-4045-8C14-6CBEFF7EFF95}|Ecommerce Jogos\\Ecommerce Jogos.csproj|d:\\fatec\\lab de engenharia de software\\projeto\\les_ecommerce\\ecommerce jogos\\controllers\\recomendacaocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{86E6193F-BA56-4045-8C14-6CBEFF7EFF95}|Ecommerce Jogos\\Ecommerce Jogos.csproj|solutionrelative:ecommerce jogos\\controllers\\recomendacaocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{86E6193F-BA56-4045-8C14-6CBEFF7EFF95}|Ecommerce Jogos\\Ecommerce Jogos.csproj|d:\\fatec\\lab de engenharia de software\\projeto\\les_ecommerce\\ecommerce jogos\\views\\pedidos\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{86E6193F-BA56-4045-8C14-6CBEFF7EFF95}|Ecommerce Jogos\\Ecommerce Jogos.csproj|solutionrelative:ecommerce jogos\\views\\pedidos\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\igorf\\AppData\\Roaming\\Microsoft\\UserSecrets\\41a0de9e-580b-4d23-9977-de7a5b317fa9\\secrets.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{86E6193F-BA56-4045-8C14-6CBEFF7EFF95}|Ecommerce Jogos\\Ecommerce Jogos.csproj|d:\\fatec\\lab de engenharia de software\\projeto\\les_ecommerce\\ecommerce jogos\\views\\recomendacao\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{86E6193F-BA56-4045-8C14-6CBEFF7EFF95}|Ecommerce Jogos\\Ecommerce Jogos.csproj|solutionrelative:ecommerce jogos\\views\\recomendacao\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{86E6193F-BA56-4045-8C14-6CBEFF7EFF95}|Ecommerce Jogos\\Ecommerce Jogos.csproj|d:\\fatec\\lab de engenharia de software\\projeto\\les_ecommerce\\ecommerce jogos\\wwwroot\\js\\recomendacao.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}",
+      "RelativeMoniker": "D:0:0:{86E6193F-BA56-4045-8C14-6CBEFF7EFF95}|Ecommerce Jogos\\Ecommerce Jogos.csproj|solutionrelative:ecommerce jogos\\wwwroot\\js\\recomendacao.js||{14D17961-FE51-464D-9111-C4AF11D7D99A}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,32 +25,56 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "PedidosController.cs",
-              "DocumentMoniker": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\Ecommerce Jogos\\Controllers\\PedidosController.cs",
-              "RelativeDocumentMoniker": "Ecommerce Jogos\\Controllers\\PedidosController.cs",
-              "ToolTip": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\Ecommerce Jogos\\Controllers\\PedidosController.cs",
-              "RelativeToolTip": "Ecommerce Jogos\\Controllers\\PedidosController.cs",
-              "ViewState": "AgIAAAQCAAAAAAAAAAAAAAECAABBAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-09T12:59:17.066Z",
+              "DocumentIndex": 1,
+              "Title": "secrets.json",
+              "DocumentMoniker": "C:\\Users\\igorf\\AppData\\Roaming\\Microsoft\\UserSecrets\\41a0de9e-580b-4d23-9977-de7a5b317fa9\\secrets.json",
+              "ToolTip": "C:\\Users\\igorf\\AppData\\Roaming\\Microsoft\\UserSecrets\\41a0de9e-580b-4d23-9977-de7a5b317fa9\\secrets.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAA2AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-11-11T12:20:27.65Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "Index.cshtml",
-              "DocumentMoniker": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\Ecommerce Jogos\\Views\\Pedidos\\Index.cshtml",
-              "RelativeDocumentMoniker": "Ecommerce Jogos\\Views\\Pedidos\\Index.cshtml",
-              "ToolTip": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\Ecommerce Jogos\\Views\\Pedidos\\Index.cshtml",
-              "RelativeToolTip": "Ecommerce Jogos\\Views\\Pedidos\\Index.cshtml",
-              "ViewState": "AgIAADABAAAAAAAAAAAswEwBAAA2AAAAAAAAAA==",
+              "DocumentMoniker": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\Ecommerce Jogos\\Views\\Recomendacao\\Index.cshtml",
+              "RelativeDocumentMoniker": "Ecommerce Jogos\\Views\\Recomendacao\\Index.cshtml",
+              "ToolTip": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\Ecommerce Jogos\\Views\\Recomendacao\\Index.cshtml",
+              "RelativeToolTip": "Ecommerce Jogos\\Views\\Recomendacao\\Index.cshtml",
+              "ViewState": "AgIAACEAAAAAAAAAAAAswEsAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-11-09T12:59:11.397Z",
+              "WhenOpened": "2025-11-11T11:59:08.209Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "recomendacao.js",
+              "DocumentMoniker": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\Ecommerce Jogos\\wwwroot\\js\\recomendacao.js",
+              "RelativeDocumentMoniker": "Ecommerce Jogos\\wwwroot\\js\\recomendacao.js",
+              "ToolTip": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\Ecommerce Jogos\\wwwroot\\js\\recomendacao.js",
+              "RelativeToolTip": "Ecommerce Jogos\\wwwroot\\js\\recomendacao.js",
+              "ViewState": "AgIAABYAAAAAAAAAAAAwwEAAAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
+              "WhenOpened": "2025-11-11T11:58:36.498Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "RecomendacaoController.cs",
+              "DocumentMoniker": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\Ecommerce Jogos\\Controllers\\RecomendacaoController.cs",
+              "RelativeDocumentMoniker": "Ecommerce Jogos\\Controllers\\RecomendacaoController.cs",
+              "ToolTip": "D:\\FATEC\\Lab de Engenharia de Software\\Projeto\\LES_Ecommerce\\Ecommerce Jogos\\Controllers\\RecomendacaoController.cs",
+              "RelativeToolTip": "Ecommerce Jogos\\Controllers\\RecomendacaoController.cs",
+              "ViewState": "AgIAACEAAAAAAAAAAAAiwDQAAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-11T11:58:12.336Z",
               "EditorCaption": ""
             }
           ]
