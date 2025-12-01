@@ -401,7 +401,6 @@ namespace Ecommerce_Jogos.Tests.Selenium
 
         private void DescerPaginaClicar(By locator)
         {
-            //var element = _wait.Until(ExpectedConditions.ElementToBeClickable(locator));
             var element = _driver.FindElement(locator);
             IJavaScriptExecutor js = (IJavaScriptExecutor)_driver;
             js.ExecuteScript("arguments[0].scrollIntoView({block: 'center'});", element);
