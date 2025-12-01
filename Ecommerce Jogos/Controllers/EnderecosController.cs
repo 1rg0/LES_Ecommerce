@@ -262,7 +262,7 @@ namespace Ecommerce_Jogos.Controllers
                     registroId: enderecoParaExcluir.ID,
                     dadosAntigos: dadosAntigos,
                     dadosNovos: new { Ativo = enderecoParaExcluir.Ativo },
-                    motivo: "Endereco inativado (soft delete) pelo administrador."
+                    motivo: "Endereco inativado pelo administrador."
             );
 
             await _context.SaveChangesAsync();

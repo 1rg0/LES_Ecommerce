@@ -68,7 +68,10 @@ namespace Ecommerce_Jogos.Controllers
                 itensVendidosQuery = itensVendidosQuery.Where(ip => produtosPorCategoria.Contains(ip.ProdutoID));
                 var vendasPorProduto = await itensVendidosQuery.Select(ip => new { Data = ip.Pedido.DataPedido.Date, ip.Quantidade, CategoriasDoProduto = ip.Produto.Categorias.Select(c => c.ID).ToList() }).ToListAsync();
                 var categoriasLookup = await _context.Categorias.Where(c => filtro.Ids.Contains(c.ID)).ToDictionaryAsync(c => c.ID, c => c.Nome);
-                vendasAgrupadas = vendasPorProduto.SelectMany(v => v.CategoriasDoProduto.Where(catId => filtro.Ids.Contains(catId)).Select(catId => new { v.Data, CategoriaId = catId, v.Quantidade })).GroupBy(x => new { x.Data, x.CategoriaId }).Select(g => new VendaAgrupadaDia { Data = g.Key.Data, IdItem = g.Key.CategoriaId, NomeItem = categoriasLookup.ContainsKey(g.Key.CategoriaId) ? categoriasLookup[g.Key.CategoriaId] : "Categoria Desconhecida", Quantidade = g.Sum(x => x.Quantidade) }).ToList();
+                vendasAgrupadas = vendasPorProduto.SelectMany(v => v.CategoriasDoProduto.Where(catId => filtro.Ids.Contains(catId))
+                .Select(catId => new { v.Data, CategoriaId = catId, v.Quantidade }))
+                    .GroupBy(x => new { x.Data, x.CategoriaId })
+                    .Select(g => new VendaAgrupadaDia { Data = g.Key.Data, IdItem = g.Key.CategoriaId, NomeItem = categoriasLookup.ContainsKey(g.Key.CategoriaId) ? categoriasLookup[g.Key.CategoriaId] : "Categoria Desconhecida", Quantidade = g.Sum(x => x.Quantidade) }).ToList();
             }
 
             var labels = new List<string>();
