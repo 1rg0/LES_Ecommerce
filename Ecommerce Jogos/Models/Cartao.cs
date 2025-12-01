@@ -8,7 +8,7 @@
         public required string DataValidade { get; set; }
         public required string Bandeira { get; set; }
         public bool Preferencial { get; set; }
-        public bool Ativo { get; set; }
+        public bool Ativo { get; set; } = true;
 
         public int ClienteID { get; set; }
         public Cliente? Cliente { get; set; }
